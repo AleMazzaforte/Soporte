@@ -21,96 +21,101 @@ const Index: React.FC = () => {
    
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-            <h1 className="text-4xl font-bold text-gray-800">Bienvenido a la Página de Soporte</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <td>Toner</td>
-                        <td>Cartuchos</td>
-                        <td>Unidad de Imagen</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>
-                            <input 
-                                type="text" 
-                                placeholder="Ingrese el modelo de toner"
-                                onChange={() => setShowToner(true)}
-                            />
-                        </td>
-                        <td>
-                            <input 
-                                type="text" 
-                                placeholder="Ingrese el modelo de cartucho"
-                                onChange={() => setShowCartucho(true)}
-                            />
-                        </td>
-                        <td>
-                            <input 
-                                type="text" 
-                                placeholder="Ingrese el modelo de Unidad de imagen"
-                                onChange={() => setShowUnidadImagen(true)}
-                            />
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>
-                            {showToner && (
-                                <select name="toner" id="selectToner">
-                                    <option value="H05A-H80A">H05A-H80A</option>
-                                    <option value="H17A">H17A</option>
-                                    <option value="H26A">H26A</option>
-                                </select>
-                            )}
-                        </td>
-                        <td>
-                            {showCartucho && (
-                                <select name="cartucho" id="selectCartucho">
-                                    <option value="EP47-N">EP47 N</option>
-                                    <option value="EP47-C">EP47 C</option>
-                                    <option value="EP47-M">EP47 M</option>
-                                    <option value="EP47-A">EP47 A</option>
-                                </select>
-                            )}
-                        </td>
-                        <td>
-                            {showUnidadImagen && (
-                                <select name="unidadDeImagen" id="selectUnidadDeImagen">
-                                    <option value="DR14-A">DR14 A</option>
-                                    <option value="DR19-A">DR19 A</option>
-                                    <option value="DR32-A">DR32 A</option>
-                                    <option value="DR1060">DR1060</option>
-                                </select>
-                            )}
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            {/* Chat de IA */}
-            <div className="mt-6 w-full max-w-md bg-white p-4 shadow-md rounded-lg">
-                <h2 className="text-xl font-semibold mb-2">Chat con IA</h2>
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
+            {/* Encabezado */}
+            <h1 className="text-4xl font-bold text-gray-800 mb-6">Centro de Soporte Técnico</h1>
+            <p className="text-lg text-gray-600 mb-8 text-center max-w-xl">
+                Ingresa los datos de tu cartucho o toner para recibir asistencia inmediata.
+            </p>
+    
+            {/* Sección de Selección de Productos */}
+            <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-3xl">
+                <h2 className="text-2xl font-semibold text-gray-700 mb-4">Selecciona el producto</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Toner */}
+                    <div>
+                        <label className="block text-gray-700 font-medium mb-1">Toner</label>
+                        <input 
+                            type="text" 
+                            className="w-full p-2 border rounded"
+                            placeholder="Modelo de toner"
+                            onChange={() => setShowToner(true)}
+                        />
+                        {showToner && (
+                            <select className="w-full mt-2 p-2 border rounded bg-white">
+                                <option value="H05A-H80A">H05A-H80A</option>
+                                <option value="H17A">H17A</option>
+                                <option value="H26A">H26A</option>
+                            </select>
+                        )}
+                    </div>
+    
+                    {/* Cartucho */}
+                    <div>
+                        <label className="block text-gray-700 font-medium mb-1">Cartucho</label>
+                        <input 
+                            type="text" 
+                            className="w-full p-2 border rounded"
+                            placeholder="Modelo de cartucho"
+                            onChange={() => setShowCartucho(true)}
+                        />
+                        {showCartucho && (
+                            <select className="w-full mt-2 p-2 border rounded bg-white">
+                                <option value="EP47-N">EP47 N</option>
+                                <option value="EP47-C">EP47 C</option>
+                                <option value="EP47-M">EP47 M</option>
+                                <option value="EP47-A">EP47 A</option>
+                            </select>
+                        )}
+                    </div>
+    
+                    {/* Unidad de Imagen */}
+                    <div>
+                        <label className="block text-gray-700 font-medium mb-1">Unidad de Imagen</label>
+                        <input 
+                            type="text" 
+                            className="w-full p-2 border rounded"
+                            placeholder="Modelo de unidad de imagen"
+                            onChange={() => setShowUnidadImagen(true)}
+                        />
+                        {showUnidadImagen && (
+                            <select className="w-full mt-2 p-2 border rounded bg-white">
+                                <option value="DR14-A">DR14 A</option>
+                                <option value="DR19-A">DR19 A</option>
+                                <option value="DR32-A">DR32 A</option>
+                                <option value="DR1060">DR1060</option>
+                            </select>
+                        )}
+                    </div>
+                </div>
+            </div>
+    
+            {/* Chat de Soporte */}
+            <div className="mt-8 w-full max-w-3xl bg-white p-6 shadow-md rounded-lg">
+                <h2 className="text-2xl font-semibold text-gray-700 mb-3">Asistente de Soporte</h2>
+                <p className="text-gray-600 mb-4">Escribe tu problema y te ayudaremos con la mejor solución.</p>
                 <input 
                     type="text" 
                     className="w-full p-2 border rounded" 
-                    placeholder="Escribe tu pregunta..."
+                    pñlaceholder="Describe tu problema..."
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                 />
                 <button 
-                    className="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                    className="mt-3 w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
                     onClick={handleChatSubmit}
                 >
                     Enviar
                 </button>
                 {chatResponse && (
-                    <p className="mt-4 p-2 bg-gray-200 rounded">{chatResponse}</p>
+                    <div className="mt-4 p-3 bg-gray-100 rounded">
+                        <p className="text-gray-700">{chatResponse}</p>
+                    </div>
                 )}
             </div>
         </div>
     );
+    
 };
 
 export default Index;
