@@ -97,7 +97,7 @@ const Index: React.FC = () => {
                 <input 
                     type="text" 
                     className="w-full p-2 border rounded" 
-                    pñlaceholder="Describe tu problema..."
+                    placeholder="Describe tu problema..."
                     value={chatInput}
                     onChange={(e) => setChatInput(e.target.value)}
                 />

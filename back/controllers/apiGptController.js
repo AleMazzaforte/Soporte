@@ -37,7 +37,12 @@ export const chatWithAI = async (req, res) => {
     } catch (error) {
         console.error("Error en OpenAI API"/*, error*/);
         console.log(error.response.data);
+        const errorResponse = error.response.data;
+        if (errorResponse && errorResponse.error) {
+            return res.status(400).json({ error: errorResponse.error.message });
+        } else {
+            return res.status(500).json({ error: "Error en el servidor" });
+        }                   
         
-        res.status(500).json({ error: "Error en el servidor" });
     }
 };
