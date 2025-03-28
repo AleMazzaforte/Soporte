@@ -15,7 +15,7 @@ export const chatWithAI = async (req, res) => {
 
     try {
         const response = await axios.post("https://api.openai.com/v1/chat/completions", {
-            model: "gpt-3.5-turbo",
+            model: "gpt-4o",
             messages: [{ role: "user", content: message }],
         }, {
             headers: {
@@ -36,10 +36,12 @@ export const chatWithAI = async (req, res) => {
         
     } catch (error) {
         console.error("Error en OpenAI API"/*, error*/);
-        console.log(error.response.data);
+        console.log( 'error data', error.response.data);
+        console.log( 'error status', error.response.status);
         const errorResponse = error.response.data;
         if (errorResponse && errorResponse.error) {
-            return res.status(400).json({ error: errorResponse.error.message });
+            
+            return res.status(400).json({ error: errorResponse.error.message, error2: error.response.status });
         } else {
             return res.status(500).json({ error: "Error en el servidor" });
         }                   

@@ -1,6 +1,6 @@
 
 import { Routes, Route } from "react-router-dom"
-import Index from "../Index"; // Asegúrate de importar el componente Home
+import Index from "../Index"; 
 
 export const Rutas: React.FC = () => { 
     return (
