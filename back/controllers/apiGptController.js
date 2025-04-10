@@ -2,8 +2,8 @@ import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
 
-console.log('process.env.OPENAI_API_KEY:', process.env.OPENAPI_API_KEY)
-const API = process.env.OPENAPI_API_KEY
+
+const API = process.env.OPENAI_API_KEY
 export const chatWithAI = async (req, res) => {
     const { message, context } = req.body;
     
