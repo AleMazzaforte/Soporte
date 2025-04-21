@@ -8,8 +8,9 @@ if (window.location.host === "localhost:5173") {
     urlBase = Endpoints.URLDEV;
 }
 
-const chat = Endpoints.CHAT;
 
+const chat = Endpoints.CHAT;
+console.log('url prod', Endpoints.URLPROD+chat);
 interface ChatMessage {
     sender: 'user' | 'bot';
     text: string;
@@ -224,11 +225,12 @@ const Index: React.FC = () => {
             )}
 
             {/* Mostrar información de cartuchos si hay modelo seleccionado */}
-            {selections.modelo && currentStep !== "chat" && (
+            {selections.modelo && (
                 <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-3xl mt-4 text-center">
                     <h2 className="text-2xl font-semibold text-gray-700 mb-4">Estos son tus cartuchos</h2>
                     <img src="/ruta-a-la-imagen.jpg" alt="Cartuchos compatibles" className="w-64 mx-auto mb-4" />
                     <p className="text-gray-600">Aquí están los cartuchos compatibles con tu impresora.</p>
+                    <div><br /></div>
                 </div>
             )}
 
@@ -273,15 +275,6 @@ const Index: React.FC = () => {
                             Enviar
                         </button>
                     </div>
-                </div>
-            )}
-
-            {/* Información de cartuchos */}
-            {selections.modelo && currentStep !== "chat" && (
-                <div className="cartridges-info">
-                    <h2>Estos son tus cartuchos</h2>
-                    <img src="/ruta-a-la-imagen.jpg" alt="Cartuchos compatibles" />
-                    <p>Aquí están los cartuchos compatibles con tu impresora.</p>
                 </div>
             )}
         </div>
