@@ -9,7 +9,7 @@ const tonersHP = [
       ]
     },
     {
-      modelo: "H12A N",
+      modelo: "H12A",
       impresoras: [
         "LaserJet serie 1010",
         "LaserJet 1012",
@@ -20,7 +20,7 @@ const tonersHP = [
       ]
     },
     {
-      modelo: "H17A N",
+      modelo: "H17A",
       impresoras: [
         "LaserJet Pro MFP serie /M130",
         "LaserJet Pro serie M102"
@@ -57,14 +57,7 @@ const tonersHP = [
         "LaserJet Pro MFP serie /M521"
       ]
     },
-    {
-      modelo: "H58A S/C",
-      impresoras: [
-        "LaserJet Pro serie M404-M405",
-        "LaserJet Pro M428dw MFP",
-        "LaserJet Pro M428fdw MFP"
-      ]
-    },
+   
     {
       modelo: "H58A",
       impresoras: [
@@ -74,7 +67,7 @@ const tonersHP = [
       ]
     },
     {
-      modelo: "H64A-90A",
+      modelo: "H64A-H90A",
       impresoras: [
         "LaserJet 600 serie M601",
         "LaserJet 600 serie M602",
@@ -114,7 +107,7 @@ const tonersHP = [
       ]
     },
     {
-      modelo: "H85A-35A-36A",
+      modelo: "H85A-H35A-H36A",
       impresoras: [
         "LaserJet pro serie P1102w",
         "LaserJet P1005",
@@ -138,13 +131,7 @@ const tonersHP = [
         "LaserJet Enterprise M527dn MFP"
       ]
     },
-    {
-      modelo: "H89A S/C",
-      impresoras: [
-        "LaserJet Enterprise serie M507",
-        "LaserJet Enterprise serie M528 MFP"
-      ]
-    },
+    
     {
       modelo: "H89A",
       impresoras: [
@@ -159,14 +146,7 @@ const tonersHP = [
         "Neverstop Laser serie 1200"
       ]
     },
-    {
-      modelo: "H105A S/C",
-      impresoras: [
-        "Laser MFP 135w",
-        "Laser MFP 137fnw",
-        "Laser 107w"
-      ]
-    },
+    
     {
       modelo: "H105A",
       impresoras: [
@@ -175,13 +155,7 @@ const tonersHP = [
         "Laser 107w"
       ]
     },
-    {
-      modelo: "H136A S/C",
-      impresoras: [
-        "LaserJet M211",
-        "LaserJet M236 MFP"
-      ]
-    },
+    
     {
       modelo: "H136A",
       impresoras: [
@@ -190,7 +164,7 @@ const tonersHP = [
       ]
     },
     {
-      modelo: "H310A-350A N",
+      modelo: "H310A-H350A N",
       impresoras: [
         "LaserJet Pro CP1025nw en Color",
         "LaserJet Pro 100 Color MFP M175",
@@ -199,7 +173,7 @@ const tonersHP = [
       ]
     },
     {
-      modelo: "H311A-351A C",
+      modelo: "H311A-H351A C",
       impresoras: [
         "LaserJet Pro CP1025nw en Color",
         "LaserJet Pro 100 Color MFP M176",
@@ -208,7 +182,7 @@ const tonersHP = [
       ]
     },
     {
-      modelo: "H312A-352A A",
+      modelo: "H312A-H352A A",
       impresoras: [
         "LaserJet Pro CP1025nw en Color",
         "LaserJet Pro 100 Color MFP M177",
@@ -217,7 +191,7 @@ const tonersHP = [
       ]
     },
     {
-      modelo: "H313A-353A M",
+      modelo: "H313A-H353A M",
       impresoras: [
         "LaserJet Pro CP1025nw en Color",
         "LaserJet Pro 100 Color MFP M178",
@@ -226,19 +200,19 @@ const tonersHP = [
       ]
     },
     {
-      modelo: "H320A-540A N",
+      modelo: "H320A-H540A N",
       impresoras: [
         "LaserJet Pro serie CM1415 Color MFP",
         "LaserJet Pro Color serie CP1525",
         "LaserJet CM1312 Color MFP",
         "LaserJet serie CP1210 Color",
-        "LaserJet CP1518ni Color",
+        "LaserJet CP1518n Color",
         "LaserJet CP1215 Color",
         "LaserJet CP1515n"
       ]
     },
     {
-      modelo: "H321A-541A C",
+      modelo: "H321A-H541A C",
       impresoras: [
         "LaserJet Pro serie CM1415 Color MFP",
         "LaserJet Pro Color serie CP1526",
@@ -250,7 +224,7 @@ const tonersHP = [
       ]
     },
     {
-      modelo: "H322A-542A A",
+      modelo: "H322A-H542A A",
       impresoras: [
         "LaserJet Pro serie CM1415 Color MFP",
         "LaserJet Pro Color serie CP1527",
@@ -262,7 +236,7 @@ const tonersHP = [
       ]
     },
     {
-      modelo: "H323A-543A M",
+      modelo: "H323A-H543A M",
       impresoras: [
         "LaserJet Pro serie CM1415 Color MFP",
         "LaserJet Pro Color serie CP1528",
@@ -322,3 +296,57 @@ const tonersHP = [
       ]
     }
   ];
+
+  //const conn = require('./tuArchivoDeConexion.js'); // Ajusta la ruta según donde esté tu conexión
+import conn from '../db/db.js'
+async function guardarImpresorasHp() {
+  let connection;
+  try {
+      connection = await conn.getConnection();
+      console.log('Conexión a la base de datos establecida');
+
+      // Iterar sobre cada modelo de toner
+      for (const toner of tonersHP) {
+          // Buscar el id del toner en la tabla tonersHp
+          const [tonerRows] = await connection.query(
+              'SELECT id FROM tonersHp WHERE nombre = ?', 
+              [toner.modelo]
+          );
+
+          if (tonerRows.length === 0) {
+              console.log(`No se encontró el toner ${toner.modelo} en la base de datos`);
+              continue;
+          }
+
+          const idToner = tonerRows[0].id;
+
+          // Insertar cada impresora asociada a este toner
+          for (const impresora of toner.impresoras) {
+              try {
+                  await connection.query(
+                      'INSERT INTO impresorasHpToner (nombre, idToner) VALUES (?, ?)',
+                      [impresora, idToner]
+                  );
+                  console.log(`Insertada impresora: ${impresora} con toner ID: ${idToner}`);
+              } catch (error) {
+                  if (error.code === 'ER_DUP_ENTRY') {
+                      console.log(`La impresora ${impresora} ya existe en la base de datos`);
+                  } else {
+                      console.error(`Error al insertar ${impresora}:`, error);
+                  }
+              }
+          }
+      }
+
+      console.log('Proceso completado exitosamente');
+  } catch (error) {
+      console.error('Error en el proceso:', error);
+  } finally {
+      if (connection) {
+          connection.release(); // Liberar la conexión al pool
+          console.log('Conexión liberada');
+      }
+  }
+}
+
+guardarImpresorasHp();
