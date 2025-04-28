@@ -8,8 +8,6 @@ let urlBase = Endpoints.URLPROD;
 if (window.location.host === "localhost:5173") {
   urlBase = Endpoints.URLDEV;
 }
-console.log('urlBase1', urlBase);
-
 const chat = Endpoints.CHAT;
 
 interface Impresora {
@@ -39,7 +37,6 @@ const Index: React.FC = () => {
     falla: "",
   });
 
-
   const [chatInput, setChatInput] = useState("");
   const [currentStep, setCurrentStep] = useState<
     "pais" | "medioCompra" | "impresora" | "modelo" | "falla" | "chat"
@@ -50,11 +47,13 @@ const Index: React.FC = () => {
   const [modelos, setModelos] = useState<Impresora[]>([]);
   const [isLoadingModelos, setIsLoadingModelos] = useState(false);
 
+  const [tonerInfo, setTonerInfo] = useState<{ nombre: string } | null>(null);
+
   const handleSelection = async (
     key: keyof typeof selections,
     value: string
   ) => {
-    console.log('urlBase2', urlBase);
+
     setSelections((prev) => ({ ...prev, [key]: value }));
     const stepHandlers = {
       pais: async () => {
@@ -62,38 +61,52 @@ const Index: React.FC = () => {
         try {
           const response = await axios.get(`${urlBase}/listarMarcas`);
           setMarcas(response.data);
-         
         } catch (error) {
           console.error("Error al cargar las marcas", error);
           setMarcas([]);
-          
-          
         }
       },
       medioCompra: () => setCurrentStep("impresora"),
-      impresora: async () => {console.log('urlBase3', urlBase);
+      impresora: async () => {
+
         setIsLoadingModelos(true);
         try {
           // Busca el ID de la marca seleccionada
-          const marcaSeleccionada = marcas.find(m => m.nombre === value);
+          const marcaSeleccionada = marcas.find((m) => m.nombre === value);
           if (marcaSeleccionada) {
             // Usa el ID de la marca en la URL
-            console.log('urlBase4', urlBase);
-            const endpoint = urlBase + '/impresoras/' + marcaSeleccionada.id
-            console.log( endpoint);
-            
+          
+            const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
+
+
             const response = await axios.get(`${endpoint}`);
             setModelos(response.data.data || []);
           }
         } catch (error) {
           console.error(`Error al cargar modelos ${value}`, error);
-          setModelos([]);
+          setModelos([]); 
         } finally {
           setIsLoadingModelos(false);
         }
         setCurrentStep("modelo");
       },
-      modelo: () => setCurrentStep("falla"),
+      modelo: async () => {
+        const modeloSeleccionado = modelos.find((m) => m.nombre === value);
+        if (modeloSeleccionado) {
+          try {
+            // Obtener información del toner
+            const response = await axios.get(
+              `${urlBase}/sku/${modeloSeleccionado.idToner}`
+            );
+            setTonerInfo(response.data.data);
+            
+          } catch (error) {
+            console.error("Error al cargar información del toner", error);
+            setTonerInfo(null);
+          }
+        }
+        setCurrentStep("falla");
+      },
       falla: () => setCurrentStep("chat"),
     };
 
@@ -317,19 +330,15 @@ const Index: React.FC = () => {
       {selections.modelo && (
         <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-3xl mt-4 text-center">
           <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-            Estos son tus cartuchos
+            Cartucho compatible
           </h2>
-          <img
-            src="/ruta-a-la-imagen.jpg"
-            alt="Cartuchos compatibles"
-            className="w-64 mx-auto mb-4"
-          />
-          <p className="text-gray-600">
-            Aquí están los cartuchos compatibles con tu impresora.
-          </p>
-          <div>
-            <br />
-          </div>
+          {tonerInfo ? (
+            <p className="text-gray-600">{tonerInfo.nombre}</p>
+          ) : (
+            <p className="text-gray-600">
+              No se encontró información del cartucho compatible
+            </p>
+          )}
         </div>
       )}
 

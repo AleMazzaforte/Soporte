@@ -2,6 +2,7 @@ import { Router } from "express";
 import { chatWithAI } from "../controllers/apiGptController.js";
 import { listarMarcas } from "../controllers/marcasController.js";
 import impresorasController from "../controllers/impresorasController.js";
+import tonersController from "../controllers/tonersController.js";
 
 
 
@@ -15,6 +16,9 @@ router.get("/listarMarcas", listarMarcas)
 
 // Rutas para modelos de impresoras
 router.get('/impresoras/:idMarca', impresorasController.getImpresoras);
+
+//Rutas para modelos de toner
+router.get("/sku/:idToner", tonersController.getToners)
 
 
 export default router;
