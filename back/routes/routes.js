@@ -14,7 +14,7 @@ router.post("/chat", chatWithAI);
 router.get("/listarMarcas", listarMarcas)
 
 // Rutas para modelos de impresoras
-router.get('/impresorasHp', impresorasController.getHp);
+router.get('/impresoras/:idMarca', impresorasController.getImpresoras);
 
 
 export default router;
