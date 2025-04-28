@@ -8,6 +8,7 @@ let urlBase = Endpoints.URLPROD;
 if (window.location.host === "localhost:5173") {
   urlBase = Endpoints.URLDEV;
 }
+console.log('urlBase1', urlBase);
 
 const chat = Endpoints.CHAT;
 
@@ -38,14 +39,6 @@ const Index: React.FC = () => {
     falla: "",
   });
 
-  const marcaEndpoints: Record<string, string> = {
-    "Hewlett Packard": "impresorasHp",
-    Epson: "impresorasEpson",
-    Ricoh: "impresorasRicoh",
-    Samsung: "impresorasSamsung",
-    Xerox: "impresorasXerox",
-    // Agregar más marcas según sea necesario
-  };
 
   const [chatInput, setChatInput] = useState("");
   const [currentStep, setCurrentStep] = useState<
@@ -61,34 +54,42 @@ const Index: React.FC = () => {
     key: keyof typeof selections,
     value: string
   ) => {
+    console.log('urlBase2', urlBase);
     setSelections((prev) => ({ ...prev, [key]: value }));
-
     const stepHandlers = {
       pais: async () => {
         setCurrentStep("medioCompra");
         try {
           const response = await axios.get(`${urlBase}/listarMarcas`);
           setMarcas(response.data);
+         
         } catch (error) {
           console.error("Error al cargar las marcas", error);
           setMarcas([]);
+          
+          
         }
       },
       medioCompra: () => setCurrentStep("impresora"),
-      impresora: async () => {
-        const endpoint = marcaEndpoints[value];
-
-        if (endpoint) {
-          setIsLoadingModelos(true);
-          try {
-            const response = await axios.get(`${urlBase}/${endpoint}`);
+      impresora: async () => {console.log('urlBase3', urlBase);
+        setIsLoadingModelos(true);
+        try {
+          // Busca el ID de la marca seleccionada
+          const marcaSeleccionada = marcas.find(m => m.nombre === value);
+          if (marcaSeleccionada) {
+            // Usa el ID de la marca en la URL
+            console.log('urlBase4', urlBase);
+            const endpoint = urlBase + '/impresoras/' + marcaSeleccionada.id
+            console.log( endpoint);
+            
+            const response = await axios.get(`${endpoint}`);
             setModelos(response.data.data || []);
-          } catch (error) {
-            console.error(`Error al cargar modelos ${value}`, error);
-            setModelos([]);
-          } finally {
-            setIsLoadingModelos(false);
           }
+        } catch (error) {
+          console.error(`Error al cargar modelos ${value}`, error);
+          setModelos([]);
+        } finally {
+          setIsLoadingModelos(false);
         }
         setCurrentStep("modelo");
       },

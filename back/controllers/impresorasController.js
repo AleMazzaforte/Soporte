@@ -1,52 +1,58 @@
-import conn from '../db/db.js';
+import conn from "../db/db.js";
 
 const impresorasController = {
-  
   getImpresoras: async (req, res) => {
-    let connection;
-    let idMarca = req.params.idMarca;
-    let nombreTabla = '';
-    switch (idMarca) {
-      case 1:
-        nombreTabla = 'impresorasHpToner';
+    const idMarca = req.params.idMarca;
+    let nombreTabla = "";
+    
+
+    switch (idMarca.toString()) { // Convertir a string por si llega como número
+      case "1":
+        nombreTabla = "impresorasHpToner";
         break;
-      case 2:
-        nombreTabla = 'impresorasEpsonToner';
+      case "2":
+        nombreTabla = "impresorasEpsonToner";
         break;
-      case 3:
-        nombreTabla = 'impresorasRicohToner';
+      case "3":
+        nombreTabla = "impresorasRicohToner";
         break;
-      case 4:
-        nombreTabla = 'impresorasXeroxToner';
+      case "4":
+        nombreTabla = "impresorasXeroxToner";
         break;
-      case 5:
+      case "5":
+        nombreTabla = "impresorasSamsungToner";
+        break;
       default:
-        nombreTabla = 'impresorasSamsungToner';
-        break;
+        return res.status(400).json({
+          success: false,
+          error: { message: "Marca no válida" }
+        });
     }
+    
+
+    let connection;
     try {
       connection = await conn.getConnection();
-      const [impresoras] = await connection.query(
-        `SELECT id, nombre, idToner FROM ${nombreTabla} ORDER BY nombre`
-      );
       
+      const query = "SELECT id, nombre, idToner FROM ?? ORDER BY nombre";
+      const [rows] = await connection.query(query, [nombreTabla]);
+
       res.json({
         success: true,
-        data: impresoras
+        data: rows,
       });
-      
     } catch (error) {
-      console.error('Error al obtener impresoras HP:', error);
+      console.error("Error al obtener impresoras:", error);
       res.status(500).json({
         success: false,
-        error: { message: 'Error al obtener impresoras HP' }
+        error: { message: "Error al obtener impresoras", details: error.message },
       });
     } finally {
-      if (connection) connection.release();
+      if (connection) {
+        connection.release(); // Liberar la conexión al pool
+      }
     }
   },
-
-  
 };
 
 export default impresorasController;
