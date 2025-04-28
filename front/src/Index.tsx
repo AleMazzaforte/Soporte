@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import Select from "react-select";
 import Endpoints from "./utilities/Endpoints";
 import "./styles.css";
 
@@ -9,6 +10,12 @@ if (window.location.host === "localhost:5173") {
 }
 
 const chat = Endpoints.CHAT;
+
+interface Impresora {
+  id: number;
+  nombre: string;
+  idToner: string;
+}
 
 interface Marca {
   id: number;
@@ -30,6 +37,16 @@ const Index: React.FC = () => {
     modelo: "",
     falla: "",
   });
+
+  const marcaEndpoints: Record<string, string> = {
+    "Hewlett Packard": "impresorasHp",
+    Epson: "impresorasEpson",
+    Ricoh: "impresorasRicoh",
+    Samsung: "impresorasSamsung",
+    Xerox: "impresorasXerox",
+    // Agregar más marcas según sea necesario
+  };
+
   const [chatInput, setChatInput] = useState("");
   const [currentStep, setCurrentStep] = useState<
     "pais" | "medioCompra" | "impresora" | "modelo" | "falla" | "chat"
@@ -37,25 +54,49 @@ const Index: React.FC = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [marcas, setMarcas] = useState<Marca[]>([]);
 
+  const [modelos, setModelos] = useState<Impresora[]>([]);
+  const [isLoadingModelos, setIsLoadingModelos] = useState(false);
+
   const handleSelection = async (
     key: keyof typeof selections,
     value: string
   ) => {
     setSelections((prev) => ({ ...prev, [key]: value }));
 
-    if (key === "pais") {
-      setCurrentStep("medioCompra");
-      try {
-        const response = await axios.get(`${urlBase}/listarMarcas`);
-        setMarcas(response.data);
-      } catch (error) {
-        console.error("Error al cargar las marcas", error);
-        setMarcas([]);
-      }
-    } else if (key === "medioCompra") setCurrentStep("impresora");
-    else if (key === "impresora") setCurrentStep("modelo");
-    else if (key === "modelo") setCurrentStep("falla");
-    else if (key === "falla") setCurrentStep("chat");
+    const stepHandlers = {
+      pais: async () => {
+        setCurrentStep("medioCompra");
+        try {
+          const response = await axios.get(`${urlBase}/listarMarcas`);
+          setMarcas(response.data);
+        } catch (error) {
+          console.error("Error al cargar las marcas", error);
+          setMarcas([]);
+        }
+      },
+      medioCompra: () => setCurrentStep("impresora"),
+      impresora: async () => {
+        const endpoint = marcaEndpoints[value];
+
+        if (endpoint) {
+          setIsLoadingModelos(true);
+          try {
+            const response = await axios.get(`${urlBase}/${endpoint}`);
+            setModelos(response.data.data || []);
+          } catch (error) {
+            console.error(`Error al cargar modelos ${value}`, error);
+            setModelos([]);
+          } finally {
+            setIsLoadingModelos(false);
+          }
+        }
+        setCurrentStep("modelo");
+      },
+      modelo: () => setCurrentStep("falla"),
+      falla: () => setCurrentStep("chat"),
+    };
+
+    await stepHandlers[key]?.();
   };
 
   const goBack = (step: keyof typeof selections) => {
@@ -191,11 +232,8 @@ const Index: React.FC = () => {
 
           {currentStep === "medioCompra" && (
             <>
-              <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-                ¿Por qué medio compraste?
-              </h2>
+              <h2>¿Por qué medio compraste?</h2>
               <select
-                className="w-full p-2 border rounded"
                 value={selections.medioCompra}
                 onChange={(e) => handleSelection("medioCompra", e.target.value)}
               >
@@ -209,11 +247,8 @@ const Index: React.FC = () => {
 
           {currentStep === "impresora" && (
             <>
-              <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-                ¿Qué marca es tu impresora?
-              </h2>
+              <h2>¿Qué marca es tu impresora?</h2>
               <select
-                className="w-full p-2 border rounded"
                 value={selections.impresora}
                 onChange={(e) => handleSelection("impresora", e.target.value)}
               >
@@ -229,19 +264,23 @@ const Index: React.FC = () => {
 
           {currentStep === "modelo" && (
             <>
-              <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-                ¿Qué modelo es tu impresora?
-              </h2>
-              <select
-                className="w-full p-2 border rounded"
-                value={selections.modelo}
-                onChange={(e) => handleSelection("modelo", e.target.value)}
-              >
-                <option value="">Seleccione un modelo</option>
-                <option value="Modelo 1">Modelo 1</option>
-                <option value="Modelo 2">Modelo 2</option>
-                <option value="Modelo 3">Modelo 3</option>
-              </select>
+              <h2>Selecciona tu modelo de impresora {selections.impresora}</h2>
+              <Select
+                options={modelos.map((impresora) => ({
+                  value: impresora.nombre,
+                  label: impresora.nombre,
+                }))}
+                isLoading={isLoadingModelos}
+                placeholder="Busca tu modelo..."
+                noOptionsMessage={() => "No se encontraron modelos"}
+                onChange={(selectedOption) => {
+                  if (selectedOption) {
+                    handleSelection("modelo", selectedOption.value);
+                  }
+                }}
+                className="react-select-container"
+                classNamePrefix="react-select"
+              />
             </>
           )}
 
