@@ -34,7 +34,7 @@ const impresorasController = {
     try {
       connection = await conn.getConnection();
       
-      const query = "SELECT id, nombre, idToner FROM ?? ORDER BY nombre";
+      const query = "SELECT id, nombre, idToner FROM ?? GROUP BY nombre ORDER BY nombre";
       const [rows] = await connection.query(query, [nombreTabla]);
 
       res.json({

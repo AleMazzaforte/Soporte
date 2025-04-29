@@ -53,7 +53,6 @@ const Index: React.FC = () => {
     key: keyof typeof selections,
     value: string
   ) => {
-
     setSelections((prev) => ({ ...prev, [key]: value }));
     const stepHandlers = {
       pais: async () => {
@@ -68,23 +67,21 @@ const Index: React.FC = () => {
       },
       medioCompra: () => setCurrentStep("impresora"),
       impresora: async () => {
-
         setIsLoadingModelos(true);
         try {
           // Busca el ID de la marca seleccionada
           const marcaSeleccionada = marcas.find((m) => m.nombre === value);
           if (marcaSeleccionada) {
             // Usa el ID de la marca en la URL
-          
-            const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
 
+            const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
 
             const response = await axios.get(`${endpoint}`);
             setModelos(response.data.data || []);
           }
         } catch (error) {
           console.error(`Error al cargar modelos ${value}`, error);
-          setModelos([]); 
+          setModelos([]);
         } finally {
           setIsLoadingModelos(false);
         }
@@ -99,7 +96,6 @@ const Index: React.FC = () => {
               `${urlBase}/sku/${modeloSeleccionado.idToner}`
             );
             setTonerInfo(response.data.data);
-            
           } catch (error) {
             console.error("Error al cargar información del toner", error);
             setTonerInfo(null);
@@ -294,6 +290,48 @@ const Index: React.FC = () => {
                 }}
                 className="react-select-container"
                 classNamePrefix="react-select"
+                styles={{
+                  control: (provided, state) => ({
+                    ...provided,
+                    backgroundColor: "var(--select-bg)",
+                    color: "var(--select-color)",
+                    borderColor: state.isFocused
+                      ? "var(--primary-color)"
+                      : "var(--input-border)",
+                    boxShadow: state.isFocused
+                      ? "0 0 0 2px rgba(100, 108, 255, 0.2)"
+                      : "none",
+                    "&:hover": {
+                      borderColor: "var(--primary-hover)",
+                    },
+                  }),
+                  menu: (provided) => ({
+                    ...provided,
+                    backgroundColor: "var(--select-option-bg)",
+                    color: "var(--select-option-color)",
+                  }),
+                  option: (provided, state) => ({
+                    ...provided,
+                    textAlign: "left",
+                    backgroundColor: state.isFocused
+                      ? "var(--primary-hover)"
+                      : "var(--select-option-bg)",
+                    color: "var(--select-option-color)",
+                    "&:hover": {
+                      backgroundColor: "var(--primary-hover)",
+                      color: "white",
+                    },
+                  }),
+                  singleValue: (provided) => ({
+                    ...provided,
+                    textAlign: "left",
+                    color: "var(--select-color)",
+                  }),
+                  placeholder: (provided) => ({
+                    ...provided,
+                    color: "var(--select-color)",
+                  }),
+                }}
               />
             </>
           )}
