@@ -6,67 +6,14 @@ import conn from "../db/db.js";
 
 // Datos de los toners HP
 const modelosTonersHP = [
-  "H103A",
-  "H05A-H80A",
-  "H105A",
-  "H105A S/C",
-  "H12A",
-  "H136A",
-  "H136A S/C",
-  "H147A S/C",
-  "H150A",
-  "H150A S/C",
-  "H151A",
-  "H151A S/C",
-  "H17A",
-  "H215A-H2310A N S/C",
-  "H215A-H2311A C S/C",
-  "H215A-H2312A A S/C",
-  "H215A-H2313A M S/C",
-  "H26A",
-  "H26X",
-  "H30A",
-  "H310A-H350A N",
-  "H311A-H351A C",
-  "H312A-H352A A",
-  "H313A-H353A M",
-  "H320A-H540A N",
-  "H321A-H541A C",
-  "H322A-H542A A",
-  "H323A-H543A M",
-  "H37A",
-  "H414A-H2020A N S/C",
-  "H414A-H2021A C S/C",
-  "H414A-H2022A A S/C",
-  "H414A-H2023A M S/C",
-  "H42A",
-  "H48A",
-  "H49A-H53A",
-  "H51A",
-  "H55A",
-  "H58A",
-  "H58A S/C",
-  "H64A-H90A",
-  "H78A",
-  "H79A",
-  "H81A",
-  "H83A",
-  "H85A-H35A-H36A",
-  "H87A",
-  "H89A",
-  "H89A S/C",
-  "HCE410A N",
-  "HCE411A C",
-  "HCE412A A",
-  "HCE413A M",
-  "HCF410X N",
-  "HCF411X C",
-  "HCF412X A",
-  "HCF413X M",
-  "HCF510A N",
-  "HCF511A C",
-  "HCF512A A",
-  "HCF513A M"
+"SAM101S",
+"SAM104S",
+"SAM108S",
+"SAM111L",
+"SAM115L",
+"SAM203L",
+"SAM205L"
+
 ];
 
 async function insertarToners() {
@@ -80,7 +27,7 @@ async function insertarToners() {
     await connection.beginTransaction();
 
     // Preparar consulta de inserción
-    const query = 'INSERT INTO tonersHp (nombre) VALUES (?)';
+    const query = 'INSERT INTO toners (nombre) VALUES (?)';
 
     // Insertar cada modelo
     for (const modelo of modelosTonersHP) {

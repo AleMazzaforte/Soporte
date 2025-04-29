@@ -11,7 +11,7 @@ const impresorasController = {
         nombreTabla = "impresorasHpToner";
         break;
       case "2":
-        nombreTabla = "impresorasEpsonToner";
+        nombreTabla = "impresorasBrotherToner";
         break;
       case "3":
         nombreTabla = "impresorasRicohToner";

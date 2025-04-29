@@ -34,12 +34,13 @@ const Index: React.FC = () => {
     medioCompra: "",
     impresora: "",
     modelo: "",
+    tonerCorrecto: "",
     falla: "",
   });
 
   const [chatInput, setChatInput] = useState("");
   const [currentStep, setCurrentStep] = useState<
-    "pais" | "medioCompra" | "impresora" | "modelo" | "falla" | "chat"
+    "pais" | "medioCompra" | "impresora" | "modelo" | "tonerCorrecto" | "falla" | "chat"
   >("pais");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [marcas, setMarcas] = useState<Marca[]>([]);
@@ -53,7 +54,6 @@ const Index: React.FC = () => {
     key: keyof typeof selections,
     value: string
   ) => {
-
     setSelections((prev) => ({ ...prev, [key]: value }));
     const stepHandlers = {
       pais: async () => {
@@ -68,17 +68,11 @@ const Index: React.FC = () => {
       },
       medioCompra: () => setCurrentStep("impresora"),
       impresora: async () => {
-
         setIsLoadingModelos(true);
         try {
-          // Busca el ID de la marca seleccionada
           const marcaSeleccionada = marcas.find((m) => m.nombre === value);
           if (marcaSeleccionada) {
-            // Usa el ID de la marca en la URL
-          
             const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
-
-
             const response = await axios.get(`${endpoint}`);
             setModelos(response.data.data || []);
           }
@@ -94,18 +88,30 @@ const Index: React.FC = () => {
         const modeloSeleccionado = modelos.find((m) => m.nombre === value);
         if (modeloSeleccionado) {
           try {
-            // Obtener información del toner
             const response = await axios.get(
               `${urlBase}/sku/${modeloSeleccionado.idToner}`
             );
             setTonerInfo(response.data.data);
-            
           } catch (error) {
             console.error("Error al cargar información del toner", error);
             setTonerInfo(null);
           }
         }
-        setCurrentStep("falla");
+        setCurrentStep("tonerCorrecto");
+      },
+      tonerCorrecto: () => {
+        if (value === "Sí") {
+          setCurrentStep("falla");
+        } else {
+          // Si el toner no es correcto, mostrar "Apa la papa" y no avanzar
+          setChatMessages([{
+            sender: "bot",
+            text: "Apa la papa",
+            isError: true,
+            timestamp: new Date().toISOString()
+          }]);
+          setCurrentStep("chat"); // Saltar al chat para mostrar el mensaje
+        }
       },
       falla: () => setCurrentStep("chat"),
     };
@@ -223,6 +229,8 @@ const Index: React.FC = () => {
           renderSelectionChip("Impresora", selections.impresora, "impresora")}
         {selections.modelo &&
           renderSelectionChip("Modelo", selections.modelo, "modelo")}
+        {selections.tonerCorrecto &&
+          renderSelectionChip("¿Tóner correcto?", selections.tonerCorrecto, "tonerCorrecto")}
         {selections.falla &&
           renderSelectionChip("Falla", selections.falla, "falla")}
       </div>
@@ -298,6 +306,29 @@ const Index: React.FC = () => {
             </>
           )}
 
+          {currentStep === "tonerCorrecto" && tonerInfo && (
+            <>
+              <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-3xl mt-4 text-center">
+                <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                  Cartucho compatible
+                </h2>
+                <p className="text-gray-600 mb-6">{tonerInfo.nombre}</p>
+                <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                  ¿Es el cartucho que compraste?
+                </h2>
+                <select
+                  value={selections.tonerCorrecto}
+                  onChange={(e) => handleSelection("tonerCorrecto", e.target.value)}
+                  className="w-full p-2 border rounded"
+                >
+                  <option value="">Seleccione una opción</option>
+                  <option value="Sí">Sí</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+            </>
+          )}
+
           {currentStep === "falla" && (
             <>
               <h2 className="text-2xl font-semibold text-gray-700 mb-4">
@@ -323,21 +354,6 @@ const Index: React.FC = () => {
                 ))}
               </select>
             </>
-          )}
-        </div>
-      )}
-
-      {selections.modelo && (
-        <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-3xl mt-4 text-center">
-          <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-            Cartucho compatible
-          </h2>
-          {tonerInfo ? (
-            <p className="text-gray-600">{tonerInfo.nombre}</p>
-          ) : (
-            <p className="text-gray-600">
-              No se encontró información del cartucho compatible
-            </p>
           )}
         </div>
       )}

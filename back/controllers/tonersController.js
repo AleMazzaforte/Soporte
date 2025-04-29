@@ -3,7 +3,7 @@ import conn from "../db/db.js";
 const tonersController = {
   getToners: async (req, res) => {
     const idToner = req.params.idToner;
-    let nombreTabla = "tonersHp";
+    let nombreTabla = "toners";
     
     /*
         switch (idToner.toString()) { // Convertir a string por si llega como número
