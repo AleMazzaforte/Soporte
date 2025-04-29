@@ -3,24 +3,92 @@
   line-height: 1.5;
   font-weight: 400;
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
+/* Estilos para modo claro (default) */
+:root {
+  --text-color: #213547;
+  --background-color: #ffffff;
+  --primary-color: #646cff;
+  --primary-hover: #747bff;
+  --chip-bg: #e0f2fe;
+  --chip-color: #0369a1;
+  --container-bg: white;
+  --container-shadow: rgba(0,0,0,0.1);
+  --message-bg: #e9ecef;
+  --message-color: #333;
+  --user-message-bg: #007bff;
+  --user-message-color: white;
+  --error-message-bg: #f8d7da;
+  --error-message-color: #721c24;
+  --chat-bg: #f9f9f9;
+  --input-border: #ddd;
+  --button-bg: #f9f9f9;
+  --select-bg: white;
+  --select-color: #213547;
+  --select-option-bg: white;
+  --select-option-color: #213547;
 }
-a:hover {
-  color: #535bf2;
+/* Estilos para los elementos select y options */
+select, .react-select-container {
+  background-color: var(--select-bg);
+  color: var(--select-color);
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  padding: 10px 15px;
+  font-size: 16px;
+  margin: 5px 0;
+  width: 100%;
 }
 
+select option {
+  background-color: var(--select-option-bg);
+  color: var(--select-option-color);
+  padding: 8px 12px;
+}
+
+/* Estilo cuando el select está enfocado */
+select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+}
+/* Estilos para modo oscuro */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-color: rgba(255, 255, 255, 0.87);
+    --background-color: #242424;
+    --primary-color: #646cff;
+    --primary-hover: #535bf2;
+    --chip-bg: #1e3a8a;
+    --chip-color: #bfdbfe;
+    --container-bg: #1a1a1a;
+    --container-shadow: rgba(0,0,0,0.3);
+    --message-bg: #333;
+    --message-color: #e9ecef;
+    --user-message-bg: #2563eb;
+    --user-message-color: white;
+    --error-message-bg: #7f1d1d;
+    --error-message-color: #fecaca;
+    --chat-bg: #2d2d2d;
+    --input-border: #444;
+    --button-bg: #1a1a1a;
+    --select-bg: #1a1a1a;
+    --select-color: rgba(255, 255, 255, 0.87);
+    --select-option-bg: #2d2d2d;
+    --select-option-color: rgba(255, 255, 255, 0.87);
+
+  }
+}
+
+/* Aplicación de variables CSS */
 body {
+  color: var(--text-color);
+  background-color: var(--background-color);
   margin: 0;
   display: flex;
   place-items: center;
@@ -28,12 +96,17 @@ body {
   min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+a {
+  font-weight: 500;
+  color: var(--primary-color);
+  text-decoration: inherit;
+}
+a:hover {
+  color: var(--primary-hover);
 }
 
 button {
+  background-color: var(--button-bg);
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
@@ -67,18 +140,11 @@ button:focus-visible {
 
 /* Estilos base */
 .app-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
-  width: 100%;
-  box-sizing: border-box;
+  color: var(--text-color);
 }
 
 .app-title {
-  text-align: center;
-  color: #333;
-  margin-bottom: 30px;
+  color: var(--text-color);
 }
 
 .selections-container {
@@ -89,14 +155,8 @@ button:focus-visible {
 }
 
 .selection-chip {
-  background-color: #e0f2fe;
-  color: #0369a1;
-  border-radius: 20px;
-  padding: 8px 15px;
-  display: inline-flex;
-  align-items: center;
-  margin-right: 10px;
-  margin-bottom: 10px;
+  background-color: var(--chip-bg);
+  color: var(--chip-color);
 }
 
 .selection-chip button {
@@ -115,20 +175,15 @@ button:focus-visible {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.chat-container {
-  background: white;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.form-container,
+.chat-container,
+.cartridges-info {
+  background: var(--container-bg);
+  box-shadow: 0 2px 4px var(--container-shadow);
 }
 
 .chat-messages {
-  height: 300px;
-  overflow-y: auto;
-  margin-bottom: 20px;
-  padding: 10px;
-  background: #f9f9f9;
-  border-radius: 4px;
+  background: var(--chat-bg);
 }
 
 .empty-chat-message {
@@ -146,22 +201,18 @@ button:focus-visible {
 }
 
 .message.user {
-  background: #007bff;
-  color: white;
-  margin-left: auto;
-  border-bottom-right-radius: 4px;
+  background: var(--user-message-bg);
+  color: var(--user-message-color);
 }
 
 .message.bot {
-  background: #e9ecef;
-  color: #333;
-  margin-right: auto;
-  border-bottom-left-radius: 4px;
+  background: var(--message-bg);
+  color: var(--message-color);
 }
 
 .message.error {
-  background: #f8d7da;
-  color: #721c24;
+  background: var(--error-message-bg);
+  color: var(--error-message-color);
 }
 
 .error-message {
@@ -176,11 +227,7 @@ button:focus-visible {
 }
 
 .chat-input {
-  flex: 1;
-  padding: 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
+  border-color: var(--input-border);
 }
 
 .send-button {
