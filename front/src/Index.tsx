@@ -61,6 +61,8 @@ const Index: React.FC = () => {
         try {
           const response = await axios.get(`${urlBase}/listarMarcas`);
           setMarcas(response.data);
+          console.log("Marcas", response.data);
+          
         } catch (error) {
           console.error("Error al cargar las marcas", error);
           setMarcas([]);
@@ -75,6 +77,7 @@ const Index: React.FC = () => {
             const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
             const response = await axios.get(`${endpoint}`);
             setModelos(response.data.data || []);
+
           }
         } catch (error) {
           console.error(`Error al cargar modelos ${value}`, error);

@@ -4,6 +4,7 @@ const impresorasController = {
   getImpresoras: async (req, res) => {
     const idMarca = req.params.idMarca;
     let nombreTabla = "";
+    console.log(`ID de marca recibido: ${idMarca}`); // Log para depuración
     
 
     switch (idMarca.toString()) { // Convertir a string por si llega como número
@@ -21,6 +22,15 @@ const impresorasController = {
         break;
       case "5":
         nombreTabla = "impresorasSamsungToner";
+        break;
+      case "11":
+        nombreTabla = "impresorasLexmarkToner";
+        break;
+      case "12":
+        nombreTabla = "impresorasEpsonTinta";
+        break;
+      case "13":
+        nombreTabla = "impresorasPantumToner";
         break;
       default:
         return res.status(400).json({
