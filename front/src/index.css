@@ -259,6 +259,12 @@ button:focus-visible {
   margin: 15px 0;
 }
 
+.tonerSeleccionado {
+  color: black;
+}
+.react-select-container {
+  color: black;
+}
 /* Media Queries para Responsividad */
 
 /* Móvil (hasta 600px) */
