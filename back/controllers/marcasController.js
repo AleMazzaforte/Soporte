@@ -1,6 +1,8 @@
 import conn from "../db/db.js";
 
 export const listarMarcas = async (req, res) => {
+    console.log('listarmarcas activado');
+    
     try {
         const [marcas] = await conn.query("SELECT id, nombre FROM marcas ORDER BY nombre ASC");
         

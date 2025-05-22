@@ -19,6 +19,7 @@ router.get('/impresoras/:idMarca', impresorasController.getImpresoras);
 
 //Rutas para modelos de toner
 router.get("/sku/:idToner", tonersController.getToners)
+router.get("/getAllToners", tonersController.getAllToners)
 
 
 export default router;
