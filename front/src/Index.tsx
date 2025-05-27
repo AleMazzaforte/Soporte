@@ -312,10 +312,10 @@ const Index: React.FC = () => {
           {currentStep === "tonerCorrecto" && tonerInfo && (
             <>
               <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-3xl mt-4 text-center">
-                <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                <h2>
                   Cartucho compatible
                 </h2>
-                <p className="text-gray-600 mb-6">{tonerInfo.nombre}</p>
+                <p className="tonerSeleccionado">{tonerInfo.nombre}</p>
                 <h2 className="text-2xl font-semibold text-gray-700 mb-4">
                   ¿Es el cartucho que compraste?
                 </h2>
