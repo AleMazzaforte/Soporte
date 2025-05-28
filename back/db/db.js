@@ -31,7 +31,6 @@ export default conn;
 (async () => {
   try {
       const connection = await poolConnection.promise().getConnection();
-      console.log("✅ Conexión exitosa a la base de datos.");
       connection.release();
   } catch (error) {
       console.error("❌ Error al conectar con la base de datos:", error.message);

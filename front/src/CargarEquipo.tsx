@@ -84,7 +84,7 @@ const CargarEquipo: React.FC = () => {
         idMarca: selectedMarca.id
       };
 
-      await axios.post(`${urlBase}/api/impresorasHpToner`, payload);
+      await axios.post(`${urlBase}/guardarImpresora`, payload);
 
       setMensaje('Impresora guardada correctamente.');
       setNombreImpresora('');

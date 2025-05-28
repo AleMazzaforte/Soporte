@@ -16,6 +16,7 @@ router.get("/listarMarcas", listarMarcas)
 
 // Rutas para modelos de impresoras
 router.get('/impresoras/:idMarca', impresorasController.getImpresoras);
+router.post('/guardarImpresora', impresorasController.postGuardarImpresora);
 
 //Rutas para modelos de toner
 router.get("/sku/:idToner", tonersController.getToners)
