@@ -8,6 +8,8 @@ import tonersController from "../controllers/tonersController.js";
 
 const router = Router();
 
+
+
 // Ruta para manejar las consultas del chat con OpenAI
 router.post("/chat", chatWithAI);
 

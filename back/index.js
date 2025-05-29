@@ -2,8 +2,7 @@ import express from "express";
 import cors from "cors";
 import router from "./routes/routes.js";
 import dotenv from "dotenv";
-import conn from "./db/db.js";
-
+import jwt from "jsonwebtoken";
 dotenv.config();
 
 
@@ -13,6 +12,37 @@ const PORT = process.env.PORT;
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+//login
+app.post('/login', (req, res) => {
+  const { usuario, password } = req.body;
+console.log(req.body);
+
+  // Usuario y contraseña HARDCODEADOS
+  const usuarioCorrecto = process.env.USUARIO;
+  const passwordCorrecto = process.env.CONTRASENIA;
+  const SECRET_KEY = process.env.SECRET_KEY;
+  console.log(
+    usuarioCorrecto,
+    passwordCorrecto,
+    SECRET_KEY
+  );
+  
+  console.log((usuario === usuarioCorrecto && password === passwordCorrecto));
+  
+  if (usuario === usuarioCorrecto && password === passwordCorrecto) {
+    // Crear token
+    const token = jwt.sign({ usuario }, SECRET_KEY, { expiresIn: '1h' });
+    console.log(token);
+    
+    return res.json({ token });
+  } else {
+    return res.status(401).json({ mensaje: 'Credenciales incorrectas' });
+  }
+});
+
+
+
 
 // Ruta para manejar las consultas del chat con OpenAI
 app.use("/", router);

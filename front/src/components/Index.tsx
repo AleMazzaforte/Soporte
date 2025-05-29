@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import Select from "react-select";
-import Endpoints from "./utilities/Endpoints";
-import "./styles.css";
+import Endpoints from "../utilities/Endpoints";
+import "../styles.css";
 
 let urlBase = Endpoints.URLPROD;
 if (window.location.host === "localhost:5173") {

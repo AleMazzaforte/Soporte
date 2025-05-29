@@ -51,9 +51,7 @@ const impresorasController = {
         success: false,
         error: { message: "Marca no válida" },
       });
-    }
-    console.log('nombretabla', nombreTabla);
-    
+    }    
 
     let connection;
     try {
