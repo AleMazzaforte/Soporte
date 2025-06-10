@@ -24,5 +24,8 @@ router.post('/guardarImpresora', impresorasController.postGuardarImpresora);
 router.get("/sku/:idToner", tonersController.getToners)
 router.get("/getAllToners", tonersController.getAllToners)
 
+//Ruta para recibir impresora no mostrada
+router.post('/guardarNoMostrada', impresorasController.postNoMostrada)
+
 
 export default router;

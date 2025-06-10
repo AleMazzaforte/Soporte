@@ -1,13 +1,22 @@
 const tonersRicoh = [
   {
-    modelo: "RIC310-RIC377",
-    impresoras: ["SP 311DNw", "SP 311SFNw", "SP 377SFNwX", "SP 377DNwX"]
+    "modelo": "XER3020",
+    "impresoras": ["3020", "3025"]
   },
   {
-    modelo: "RIC3710",
-    impresoras: ["SP 3710DN", "SP 3710SF"]
-  }
-];
+    "modelo": "XER210",
+    "impresoras": ["B205", "B210", "B215"]
+  },
+  {
+    "modelo": "XER3140-XER3160",
+    "impresoras": ['3140' , '3155' , '3160']
+  },
+  {
+    "modelo": "XER3250",
+    "impresoras": ['3250']
+  },
+ 
+]
 
 
   //const conn = require('./tuArchivoDeConexion.js'); // Ajusta la ruta según donde esté tu conexión
@@ -33,11 +42,12 @@ async function guardarImpresorasHp() {
 
           const idToner = tonerRows[0].id;
 
+
           // Insertar cada impresora asociada a este toner
           for (const impresora of toner.impresoras) {
               try {
                   await connection.query(
-                      'INSERT INTO impresorasRicohToner (nombre, idToner) VALUES (?, ?)',
+                      'INSERT INTO  impresorasXeroxToner (nombre, idToner) VALUES (?, ?)',
                       [impresora, idToner]
                   );
                   console.log(`Insertada impresora: ${impresora} con toner ID: ${idToner}`);

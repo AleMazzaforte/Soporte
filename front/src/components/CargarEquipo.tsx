@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Select from "react-select";
 import axios from "axios";
 import Endpoints from "../utilities/Endpoints";
+import ListarImpresoras from "../utilities/ListarImpresoras";
 import {useNavigate} from "react-router-dom"
 
 let urlBase = Endpoints.URLPROD;
@@ -31,9 +32,9 @@ const CargarEquipo: React.FC = () => {
 
   useEffect(() => {
     if (!token) {
-      // Redirigir al login si no hay token
       
-      navigate("/login") // o usa navigate("/login") si usas react-router
+      
+      navigate("/login") 
     }
   }, [token]);
 
@@ -41,7 +42,7 @@ const CargarEquipo: React.FC = () => {
     const fetchToners = async () => {
       try {
         const response = await axios.get(`${urlBase}/getAllToners`);
-        // Asumiendo que este endpoint SÍ tiene estructura {success, data}
+        
         if (response.data.success) {
           const options = response.data.data.map((item: any) => ({
             id: item.id,
@@ -66,26 +67,28 @@ const CargarEquipo: React.FC = () => {
     const fetchMarcas = async () => {
       try {
         const response = await axios.get(`${urlBase}/listarMarcas`);
-        // Adaptado para el endpoint que devuelve array directo
+        
         const optionsMarca = response.data.map((item: any) => ({
           id: item.id,
           nombre: item.nombre,
           label: item.nombre,
           value: item.id,
         }));
+        
         setMarcaOptions(optionsMarca);
       } catch (error) {
         console.error("Error al cargar marcas:", error);
         setMensaje("Error al cargar marcas del servidor.");
       }
     };
-
+ 
     fetchMarcas();
   }, []);
-
+ 
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+console.log('optionMarca', selectedMarca);
     if (!nombreImpresora || !selectedToner || !selectedMarca) {
       setMensaje("Debes completar todos los campos.");
       return;
@@ -178,6 +181,15 @@ const CargarEquipo: React.FC = () => {
             placeholder="Ej: HP LaserJet Pro M404"
           />
         </div>
+
+        {selectedMarca && selectedToner && nombreImpresora && (
+          
+            <ListarImpresoras 
+              marcaId={selectedMarca.id}
+              filtroNombre={nombreImpresora}
+             />
+          
+        ) }
 
         <button
           type="submit"

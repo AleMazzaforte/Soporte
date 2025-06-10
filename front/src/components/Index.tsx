@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import Select from "react-select";
 import Endpoints from "../utilities/Endpoints";
+
 import "../styles.css";
 
 let urlBase = Endpoints.URLPROD;
@@ -40,7 +41,13 @@ const Index: React.FC = () => {
 
   const [chatInput, setChatInput] = useState("");
   const [currentStep, setCurrentStep] = useState<
-    "pais" | "medioCompra" | "impresora" | "modelo" | "tonerCorrecto" | "falla" | "chat"
+    | "pais"
+    | "medioCompra"
+    | "impresora"
+    | "modelo"
+    | "tonerCorrecto"
+    | "falla"
+    | "chat"
   >("pais");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [marcas, setMarcas] = useState<Marca[]>([]);
@@ -49,6 +56,71 @@ const Index: React.FC = () => {
   const [isLoadingModelos, setIsLoadingModelos] = useState(false);
 
   const [tonerInfo, setTonerInfo] = useState<{ nombre: string } | null>(null);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newModelName, setNewModelName] = useState("");
+  const [newModelToner, setNewModelToner] = useState("");
+  const [isHuman, setIsHuman] = useState(false);
+  const [botCheck, setBotCheck] = useState("");
+
+  const handleSubmitModel = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Validación básica
+    if (!newModelName.trim() || !newModelToner.trim()) {
+      alert("Por favor completa todos los campos.");
+      return;
+    }
+
+    if (!isHuman) {
+      alert("Por favor marca la opción 'Soy un humano'.");
+      return;
+    }
+    if (botCheck !== "") {
+      setIsModalOpen(false);
+
+      return;
+    }
+
+    // Datos a enviar
+    const data = {
+      nombre: newModelName,
+      idToner: newModelToner,
+      idMarca:
+        marcas.find((m) => m.nombre === selections.impresora)?.id || null,
+    };
+
+    try {
+      const response = await axios.post(`${urlBase}/guardarNoMostrada`, data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.data.success) {
+        alert("Modelo guardado correctamente.");
+        setIsModalOpen(false);
+        setNewModelName("");
+        setNewModelToner("");
+      } else {
+        throw new Error(response.data.error?.message || "Error desconocido");
+      }
+    } catch (error) {
+      let errorMessage = "Hubo un error al guardar el modelo.";
+
+      if (axios.isAxiosError(error)) {
+        errorMessage =
+          error.response?.data?.error?.message ||
+          error.message ||
+          "Error de conexión";
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      console.error(errorMessage);
+      alert(errorMessage);
+    }
+  };
 
   const handleSelection = async (
     key: keyof typeof selections,
@@ -62,7 +134,6 @@ const Index: React.FC = () => {
           const response = await axios.get(`${urlBase}/listarMarcas`);
           setMarcas(response.data);
           console.log("Marcas", response.data);
-          
         } catch (error) {
           console.error("Error al cargar las marcas", error);
           setMarcas([]);
@@ -77,11 +148,10 @@ const Index: React.FC = () => {
             const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
             const response = await axios.get(`${endpoint}`);
             setModelos(response.data.data || []);
-
           }
         } catch (error) {
           console.error(`Error al cargar modelos ${value}`, error);
-          setModelos([]); 
+          setModelos([]);
         } finally {
           setIsLoadingModelos(false);
         }
@@ -107,12 +177,14 @@ const Index: React.FC = () => {
           setCurrentStep("falla");
         } else {
           // Si el toner no es correcto, mostrar "Apa la papa" y no avanzar
-          setChatMessages([{
-            sender: "bot",
-            text: "Apa la papa",
-            isError: true,
-            timestamp: new Date().toISOString()
-          }]);
+          setChatMessages([
+            {
+              sender: "bot",
+              text: "Apa la papa",
+              isError: true,
+              timestamp: new Date().toISOString(),
+            },
+          ]);
           setCurrentStep("chat"); // Saltar al chat para mostrar el mensaje
         }
       },
@@ -233,7 +305,11 @@ const Index: React.FC = () => {
         {selections.modelo &&
           renderSelectionChip("Modelo", selections.modelo, "modelo")}
         {selections.tonerCorrecto &&
-          renderSelectionChip("¿Tóner correcto?", selections.tonerCorrecto, "tonerCorrecto")}
+          renderSelectionChip(
+            "¿Tóner correcto?",
+            selections.tonerCorrecto,
+            "tonerCorrecto"
+          )}
         {selections.falla &&
           renderSelectionChip("Falla", selections.falla, "falla")}
       </div>
@@ -296,8 +372,15 @@ const Index: React.FC = () => {
                   label: impresora.nombre,
                 }))}
                 isLoading={isLoadingModelos}
+                noOptionsMessage={() => (
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="add-model-button"
+                  >
+                    No encuentro mi modelo, agregar nuevo
+                  </button>
+                )}
                 placeholder="Busca tu modelo..."
-                noOptionsMessage={() => "No se encontraron modelos"}
                 onChange={(selectedOption) => {
                   if (selectedOption) {
                     handleSelection("modelo", selectedOption.value);
@@ -306,22 +389,84 @@ const Index: React.FC = () => {
                 className="react-select-container"
                 classNamePrefix="react-select"
               />
+
+              {/* Modal */}
+              {isModalOpen && (
+                <div className="modal-overlay">
+                  <div className="modal-content">
+                    <h3>Agregar nuevo modelo</h3>
+                    <form onSubmit={handleSubmitModel}>
+                      <label style={{ paddingLeft: "15px" }}>Impresora </label>
+                      <input
+                        className="modal-input"
+                        type="text"
+                        placeholder="Nombre de la impresora"
+                        value={newModelName}
+                        onChange={(e) => setNewModelName(e.target.value)}
+                        required
+                      />
+
+                      <br />
+                      <br />
+                      <label style={{ paddingLeft: "15px" }}>
+                        Toner/Cartucho
+                      </label>
+                      <input
+                        className="modal-input"
+                        type="text"
+                        placeholder="Toner/Cartucho"
+                        value={newModelToner}
+                        onChange={(e) => setNewModelToner(e.target.value)}
+                        required
+                      />
+                      <br />
+                      <br />
+                      {/* Checkbox "No soy un robot" */}
+                      <label className="human-check-label">
+                        <input
+                          type="checkbox"
+                          checked={isHuman}
+                          onChange={(e) => setIsHuman(e.target.checked)}
+                        />
+                        Soy un humano
+                      </label>
+
+                      {/* Campo oculto honeypot (solo bots lo rellenan) */}
+                      <input
+                        type="text"
+                        value={botCheck}
+                        onChange={(e) => setBotCheck(e.target.value)}
+                        className="honeypot-input" // Clase CSS para ocultarlo
+                      />
+                      <div className="modal-buttons">
+                        <button type="submit">Guardar</button>
+                        <button
+                          type="button"
+                          onClick={() => setIsModalOpen(false)}
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
             </>
           )}
 
           {currentStep === "tonerCorrecto" && tonerInfo && (
             <>
               <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-3xl mt-4 text-center">
-                <h2>
-                  Cartucho compatible
-                </h2>
+                <h2>Cartucho compatible</h2>
                 <p className="tonerSeleccionado">{tonerInfo.nombre}</p>
                 <h2 className="text-2xl font-semibold text-gray-700 mb-4">
                   ¿Es el cartucho que compraste?
                 </h2>
                 <select
                   value={selections.tonerCorrecto}
-                  onChange={(e) => handleSelection("tonerCorrecto", e.target.value)}
+                  onChange={(e) =>
+                    handleSelection("tonerCorrecto", e.target.value)
+                  }
                   className="w-full p-2 border rounded"
                 >
                   <option value="">Seleccione una opción</option>

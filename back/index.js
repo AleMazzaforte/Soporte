@@ -16,17 +16,11 @@ app.use(express.json());
 //login
 app.post('/login', (req, res) => {
   const { usuario, password } = req.body;
-console.log(req.body);
 
-  // Usuario y contraseña HARDCODEADOS
   const usuarioCorrecto = process.env.USUARIO;
   const passwordCorrecto = process.env.CONTRASENIA;
   const SECRET_KEY = process.env.SECRET_KEY;
-  console.log(
-    usuarioCorrecto,
-    passwordCorrecto,
-    SECRET_KEY
-  );
+  
   
   console.log((usuario === usuarioCorrecto && password === passwordCorrecto));
   

@@ -78,6 +78,44 @@ const impresorasController = {
       if (connection) connection.release();
     }
   },
+
+  postNoMostrada: async (req, res) => {
+    const { nombre, idToner, idMarca } = req.body;
+    
+    const nombreTabla = "impresoraNoEncontrada";
+
+    if (!nombreTabla) {
+      return res.status(400).json({
+        success: false,
+        error: { message: "Marca no válida" },
+      });
+    }    
+
+    let connection;
+    try {
+      connection = await conn.getConnection();
+
+      const query = `INSERT INTO \`${nombreTabla}\` (nombre, idToner, idMarca) VALUES ( ?, ?, ?)`;
+
+      await connection.query(query, [nombre, idToner, idMarca]);
+
+      res.status(200).json({
+        success: true,
+        message: "Impresora guardada correctamente",
+      });
+    } catch (error) {
+      console.error("Error al guardar impresora:", error);
+      res.status(500).json({
+        success: false,
+        error: {
+          message: "Error al guardar impresora",
+          details: error.message,
+        },
+      });
+    } finally {
+      if (connection) connection.release();
+    }
+  },
 };
 
 export default impresorasController;

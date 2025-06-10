@@ -4,6 +4,7 @@ import Index from "../components/Index";
 import CargarEquipo from "../components/CargarEquipo";
 import PrivateRoute, {  } from "../utilities/PrivateRoutes";
 import Login from "../components/Login";
+import { NotFound } from "../components/NotFound";
 
 export const Rutas: React.FC = () => { 
     return (
@@ -17,6 +18,7 @@ export const Rutas: React.FC = () => {
                 </PrivateRoute>
                 }
              />
+             <Route path="*" element={<NotFound />} />
         </Routes> 
     );
 };
