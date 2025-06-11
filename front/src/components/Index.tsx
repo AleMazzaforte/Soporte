@@ -39,6 +39,7 @@ const Index: React.FC = () => {
     falla: "",
   });
 
+
   const [chatInput, setChatInput] = useState("");
   const [currentStep, setCurrentStep] = useState<
     | "pais"
@@ -176,16 +177,16 @@ const Index: React.FC = () => {
         if (value === "Sí") {
           setCurrentStep("falla");
         } else {
-          // Si el toner no es correcto, mostrar "Apa la papa" y no avanzar
+          
           setChatMessages([
             {
               sender: "bot",
-              text: "Apa la papa",
+              text: "Tu producto no corresponde con tu equipo",
               isError: true,
               timestamp: new Date().toISOString(),
             },
           ]);
-          setCurrentStep("chat"); // Saltar al chat para mostrar el mensaje
+          setCurrentStep("chat"); 
         }
       },
       falla: () => setCurrentStep("chat"),
@@ -275,13 +276,12 @@ const Index: React.FC = () => {
   };
 
   const renderSelectionChip = (
-    label: string,
     value: string,
     step: keyof typeof selections
   ) => (
     <div className="selection-chip">
       <span>
-        {label}: {value}
+         {value}
       </span>
       <button onClick={() => goBack(step)}>✕</button>
     </div>
@@ -293,25 +293,25 @@ const Index: React.FC = () => {
 
       <div className="selections-container">
         {selections.pais &&
-          renderSelectionChip("País", selections.pais, "pais")}
+          renderSelectionChip(selections.pais, "pais")}
         {selections.medioCompra &&
           renderSelectionChip(
-            "Medio de compra",
+  
             selections.medioCompra,
             "medioCompra"
           )}
         {selections.impresora &&
-          renderSelectionChip("Impresora", selections.impresora, "impresora")}
+          renderSelectionChip( selections.impresora, "impresora")}
         {selections.modelo &&
-          renderSelectionChip("Modelo", selections.modelo, "modelo")}
+          renderSelectionChip( selections.modelo, "modelo")}
         {selections.tonerCorrecto &&
           renderSelectionChip(
-            "¿Tóner correcto?",
+            
             selections.tonerCorrecto,
             "tonerCorrecto"
           )}
         {selections.falla &&
-          renderSelectionChip("Falla", selections.falla, "falla")}
+          renderSelectionChip( selections.falla, "falla")}
       </div>
 
       {currentStep !== "chat" && (

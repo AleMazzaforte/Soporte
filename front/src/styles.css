@@ -40,11 +40,12 @@
 
 /* Formulario */
 .form-container {
-    background: white;
+    border: rgba(0,0,0,0.1) 1px solid;
+    
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
 
 .form-container h2 {
@@ -52,12 +53,13 @@
     color: #333;
 }
 
-.form-container select {
+.react-select-container  {
     width: 100%;
     padding: 10px;
-    border: 1px solid #ddd;
+    border: none;
     border-radius: 4px;
     font-size: 16px;
+    
 }
 
 /* Chat */
