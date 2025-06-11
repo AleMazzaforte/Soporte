@@ -2,83 +2,95 @@ import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
 
-
-const API = process.env.OPENAI_API_KEY
+const API = process.env.OPENAI_API_KEY;
 export const chatWithAI = async (req, res) => {
-    const { message, context } = req.body;
-    
-    if (!message) {
-        return res.status(400).json({ 
-            success: false,
-            error: {
-                message: "El mensaje es obligatorio",
-                code: "MESSAGE_REQUIRED"
-            } 
-        });
+  const { message, context } = req.body;
+
+  if (!message) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        message: "El mensaje es obligatorio",
+        code: "MESSAGE_REQUIRED",
+      },
+    });
+  }
+
+  try {
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content:
+              "Sos un agente de atención al cliente. Respondé con tono cordial, profesional y empático. Usá un lenguaje claro y directo. Si el cliente está molesto, respondé con comprensión. Siempre ofrecé pasos concretos para resolver su problema. No uses tecnicismos. No podes dar descuentos ni promociones y solo responder cosas relacionadas a los productos mencionados antes por el usuario. No das soporte ni informacion de impresoras de ningun tipo",
+          },
+          {
+            role: "user",
+            content: message,
+          },
+        ],
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${API}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response.data?.choices?.[0]?.message?.content) {
+      return res.status(502).json({
+        success: false,
+        error: {
+          message: "La respuesta de OpenAI no tiene el formato esperado",
+          code: "INVALID_RESPONSE_FORMAT",
+          details: response.data,
+        },
+      });
     }
 
-    try {
-        const response = await axios.post("https://api.openai.com/v1/chat/completions", {
-            model: "gpt-4o",
-            messages: [{ role: "user", content: message }],
-        }, {
-            headers: {
-                "Authorization": `Bearer ${API}`,
-                "Content-Type": "application/json",
-            },
-        });
+    res.json({
+      success: true,
+      reply: response.data.choices[0].message.content,
+    });
+  } catch (error) {
+    console.error("Error en OpenAI API:", error);
 
-        if (!response.data?.choices?.[0]?.message?.content) {
-            return res.status(502).json({
-                success: false,
-                error: {
-                    message: "La respuesta de OpenAI no tiene el formato esperado",
-                    code: "INVALID_RESPONSE_FORMAT",
-                    details: response.data
-                }
-            });
-        }
-
-        res.json({ 
-            success: true,
-            reply: response.data.choices[0].message.content 
-        });
-        
-    } catch (error) {
-        console.error("Error en OpenAI API:", error);
-        
-        // Error de OpenAI
-        if (error.response?.data?.error) {
-            return res.status(error.response.status || 500).json({
-                success: false,
-                error: {
-                    message: error.response.data.error.message,
-                    code: error.response.data.error.code || "OPENAI_ERROR",
-                    type: error.response.data.error.type,
-                    status: error.response.status
-                }
-            });
-        }
-        
-        // Error de conexión/red
-        if (error.code) {
-            return res.status(500).json({
-                success: false,
-                error: {
-                    message: `Error de conexión: ${error.message}`,
-                    code: error.code,
-                    details: error.config
-                }
-            });
-        }
-        
-        // Error genérico
-        return res.status(500).json({
-            success: false,
-            error: {
-                message: "Error interno del servidor",
-                code: "INTERNAL_SERVER_ERROR"
-            }
-        });
+    // Error de OpenAI
+    if (error.response?.data?.error) {
+      return res.status(error.response.status || 500).json({
+        success: false,
+        error: {
+          message: error.response.data.error.message,
+          code: error.response.data.error.code || "OPENAI_ERROR",
+          type: error.response.data.error.type,
+          status: error.response.status,
+        },
+      });
     }
+
+    // Error de conexión/red
+    if (error.code) {
+      return res.status(500).json({
+        success: false,
+        error: {
+          message: `Error de conexión: ${error.message}`,
+          code: error.code,
+          details: error.config,
+        },
+      });
+    }
+
+    // Error genérico
+    return res.status(500).json({
+      success: false,
+      error: {
+        message: "Error interno del servidor",
+        code: "INTERNAL_SERVER_ERROR",
+      },
+    });
+  }
 };
