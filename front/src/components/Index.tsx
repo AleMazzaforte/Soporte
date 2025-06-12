@@ -326,7 +326,7 @@ const Index: React.FC = () => {
                 <option value="">Seleccione un país</option>
                 <option value="Argentina">Argentina</option>
                 <option value="México">México</option>
-                <option value="España">España</option>
+                <option value="Chile">Chile</option>
               </select>
             </>
           )}

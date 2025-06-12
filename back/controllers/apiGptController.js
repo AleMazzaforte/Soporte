@@ -1,8 +1,24 @@
 import axios from "axios";
 import dotenv from "dotenv";
+import conn from "../db/db.js";
 dotenv.config();
 
 const API = process.env.OPENAI_API_KEY;
+async function obtenerPromptActivo() {
+  const connection = await conn.getConnection();
+  try {
+    const [rows] = await connection.query(
+      "SELECT prompt FROM prompt WHERE usarEste = true LIMIT 1"
+    );
+    
+    return rows[0]?.prompt || "Prompt por defecto: Eres un asistente útil...";
+  } finally {
+    connection.release();
+  }
+}
+const prompt = await obtenerPromptActivo();
+console.log(prompt);
+
 export const chatWithAI = async (req, res) => {
   const { message, context } = req.body;
 
@@ -24,9 +40,9 @@ export const chatWithAI = async (req, res) => {
         messages: [
           {
             role: "system",
-            content:
-              "Sos un agente de atención al cliente. Respondé con tono cordial, profesional y empático. Usá un lenguaje claro y directo. Si el cliente está molesto, respondé con comprensión. Siempre ofrecé pasos concretos para resolver su problema. No uses tecnicismos. No podes dar descuentos ni promociones y solo responder cosas relacionadas a los productos mencionados antes por el usuario. No das soporte ni informacion de impresoras de ningun tipo",
+            content: `${prompt}`.trim(),
           },
+          ...(context || []),
           {
             role: "user",
             content: message,
