@@ -56,29 +56,7 @@ const PromptManager: React.FC = () => {
     fetchPrompts();
   }, []);
 
-  // Cambiar el estado de usarEste y actualizar en backend
-  const toggleUsarEste = async (id: number) => {
-    const prompt = prompts.find((p) => p.id === id);
-    if (!prompt) return;
-
-    const nuevoEstado = !prompt.usarEste;
-
-    try {
-      await axios.put(`/api/prompts/${id}`, {
-        ...prompt,
-        usarEste: nuevoEstado,
-      });
-
-      setPrompts(
-        prompts.map((p) =>
-          p.id === id ? { ...p, usarEste: nuevoEstado } : p
-        )
-      );
-    } catch (err) {
-      alert('Error al actualizar el estado "usarEste"');
-      console.error(err);
-    }
-  };
+ 
 
   // Actualizar texto del prompt
   // Guardar cambios en un prompt específico
