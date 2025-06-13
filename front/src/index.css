@@ -33,6 +33,12 @@
   --select-option-bg: white;
   --select-option-color: #213547;
 }
+
+html, body, #root {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
 /* Estilos para los elementos select y options */
 select, .react-select-container {
   background-color: var(--select-bg);
@@ -311,7 +317,7 @@ button:focus-visible {
 /* Tablet (601px a 1024px) */
 @media (min-width: 601px) and (max-width: 1024px) {
   .app-container {
-    max-width: 90%;
+    max-width: 80%;
   }
   
   h1 {

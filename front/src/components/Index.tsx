@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Select from "react-select";
 import Endpoints from "../utilities/Endpoints";
@@ -63,6 +63,16 @@ const Index: React.FC = () => {
   const [newModelToner, setNewModelToner] = useState("");
   const [isHuman, setIsHuman] = useState(false);
   const [botCheck, setBotCheck] = useState("");
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+};
+
+  useEffect(() => {
+  scrollToBottom();
+}, [chatMessages]);
 
   const handleSubmitModel = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -530,6 +540,7 @@ const Index: React.FC = () => {
                 </div>
               ))
             )}
+            <div ref={messagesEndRef} />
           </div>
           <div className="chat-input-area">
             <input

@@ -3,6 +3,7 @@ import { chatWithAI } from "../controllers/apiGptController.js";
 import { listarMarcas } from "../controllers/marcasController.js";
 import impresorasController from "../controllers/impresorasController.js";
 import tonersController from "../controllers/tonersController.js";
+import promptsController from "../controllers/promptsController.js";
 
 
 
@@ -26,6 +27,12 @@ router.get("/getAllToners", tonersController.getAllToners)
 
 //Ruta para recibir impresora no mostrada
 router.post('/guardarNoMostrada', impresorasController.postNoMostrada)
+
+//Ruta para prompt
+router.get("/getPrompts", promptsController.getPrompts);
+router.post("/postPrompts", promptsController.postCrearPrompt);
+router.put("/prompts/:id", promptsController.putActualizarPrompt);
+router.delete("/prompts/:id", promptsController.deleteEliminarPrompt);
 
 
 export default router;

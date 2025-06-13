@@ -11,13 +11,13 @@ async function obtenerPromptActivo() {
       "SELECT prompt FROM prompt WHERE usarEste = true LIMIT 1"
     );
     
-    return rows[0]?.prompt || "Prompt por defecto: Eres un asistente útil...";
+    return rows[0]?.prompt;
   } finally {
     connection.release();
   }
 }
 const prompt = await obtenerPromptActivo();
-console.log(prompt);
+
 
 export const chatWithAI = async (req, res) => {
   const { message, context } = req.body;
