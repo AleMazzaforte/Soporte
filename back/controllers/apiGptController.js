@@ -3,12 +3,14 @@ import dotenv from "dotenv";
 import conn from "../db/db.js";
 dotenv.config();
 
-const API = process.env.OPENAI_API_KEY;
+const API = process.env.OPENAPI_API_KEY;
+
+
 async function obtenerPromptActivo() {
   const connection = await conn.getConnection();
   try {
     const [rows] = await connection.query(
-      "SELECT prompt FROM prompt WHERE usarEste = true LIMIT 1"
+      "SELECT prompt FROM prompt WHERE usarEste = true"
     );
     
     return rows[0]?.prompt;
@@ -18,6 +20,7 @@ async function obtenerPromptActivo() {
 }
 const prompt = await obtenerPromptActivo();
 
+console.log(prompt);
 
 export const chatWithAI = async (req, res) => {
   const { message, context } = req.body;
@@ -36,6 +39,7 @@ export const chatWithAI = async (req, res) => {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
+      
         model: "gpt-4o",
         messages: [
           {
@@ -108,5 +112,5 @@ export const chatWithAI = async (req, res) => {
         code: "INTERNAL_SERVER_ERROR",
       },
     });
-  }
-};
+  } 
+}

@@ -8,7 +8,7 @@
 
 .app-title {
     text-align: center;
-    color: #333;
+    
     margin-bottom: 30px;
 }
 
@@ -50,7 +50,7 @@
 
 .form-container h2 {
     margin-top: 0;
-    color: #333;
+   
 }
 
 .react-select-container  {

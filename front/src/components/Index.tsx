@@ -39,6 +39,56 @@ const Index: React.FC = () => {
     falla: "",
   });
 
+  const customStyles = {
+  control: (provided: any, state: any) => ({
+    ...provided,
+    backgroundColor: 'var(--select-bg)',
+    borderColor: 'var(--input-border)',
+    color: 'var(--select-color)',
+    padding: '10px 15px',
+    fontSize: '16px',
+    borderRadius: '4px',
+    textAlign: 'left',
+    boxShadow: state.isFocused ? '0 0 0 2px rgba(100, 108, 255, 0.2)' : null,
+    '&:hover': {
+      borderColor: 'var(--primary-color)'
+    }
+  }),
+  menu: (provided: any) => ({
+    ...provided,
+    backgroundColor: 'var(--select-bg)',
+    color: 'var(--select-color)',
+    borderRadius: '4px',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+  }),
+  option: (provided: any, state: any) => ({
+    ...provided,
+    backgroundColor: state.isSelected
+      ? 'var(--primary-color)'
+      : state.isFocused
+      ? 'var(--chip-bg)'
+      : 'var(--select-option-bg)',
+    color: state.isSelected
+      ? '#fff'
+      : 'var(--select-option-color)',
+    padding: '8px 12px',
+    textAlign: 'left',
+    '&:active': {
+      backgroundColor: 'var(--primary-hover)',
+    },
+  }),
+  singleValue: (provided: any) => ({
+    ...provided,
+    color: 'var(--select-color)',
+    textAlign: 'left',
+  }),
+  input: (provided: any) => ({
+    ...provided,
+    color: 'var(--select-color)',
+    textAlign: 'left',
+  }),
+};
+
 
   const [chatInput, setChatInput] = useState("");
   const [currentStep, setCurrentStep] = useState<
@@ -218,6 +268,7 @@ const Index: React.FC = () => {
     );
     setSelections(newSelections);
     setCurrentStep(step);
+    setChatMessages([]);
   };
 
   const handleChatSubmit = async () => {
@@ -328,7 +379,7 @@ const Index: React.FC = () => {
         <div className="form-container">
           {currentStep === "pais" && (
             <>
-              <h2>¿De qué país te contactas?</h2>
+              <h2 className="app-title">¿De qué país te contactas?</h2>
               <select
                 value={selections.pais}
                 onChange={(e) => handleSelection("pais", e.target.value)}
@@ -343,7 +394,7 @@ const Index: React.FC = () => {
 
           {currentStep === "medioCompra" && (
             <>
-              <h2>¿Por qué medio compraste?</h2>
+              <h2 className="app-title">¿Por qué medio compraste?</h2>
               <select
                 value={selections.medioCompra}
                 onChange={(e) => handleSelection("medioCompra", e.target.value)}
@@ -358,7 +409,7 @@ const Index: React.FC = () => {
 
           {currentStep === "impresora" && (
             <>
-              <h2>¿Qué marca es tu impresora?</h2>
+              <h2 className="app-title">¿Qué marca es tu impresora?</h2>
               <select
                 value={selections.impresora}
                 onChange={(e) => handleSelection("impresora", e.target.value)}
@@ -375,8 +426,9 @@ const Index: React.FC = () => {
 
           {currentStep === "modelo" && (
             <>
-              <h2>Selecciona tu modelo de impresora {selections.impresora}</h2>
+              <h2 className="app-title">Selecciona tu modelo de impresora {selections.impresora}</h2>
               <Select
+                styles={customStyles}
                 options={modelos.map((impresora) => ({
                   value: impresora.nombre,
                   label: impresora.nombre,

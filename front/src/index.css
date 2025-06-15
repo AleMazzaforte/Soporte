@@ -39,17 +39,7 @@ html, body, #root {
   margin: 0;
   padding: 0;
 }
-/* Estilos para los elementos select y options */
-select, .react-select-container {
-  background-color: var(--select-bg);
-  color: var(--select-color);
-  border: 1px solid var(--input-border);
-  border-radius: 4px;
-  padding: 10px 15px;
-  font-size: 16px;
-  margin: 5px 0;
-  width: 100%;
-}
+
 
 select option {
   background-color: var(--select-option-bg);
@@ -66,7 +56,7 @@ select:focus {
 /* Estilos para modo oscuro */
 @media (prefers-color-scheme: dark) {
   :root {
-    --text-color: rgba(255, 255, 255, 0.87);
+    --text-color: #ffffff;
     --background-color: #242424;
     --primary-color: #646cff;
     --primary-hover: #535bf2;
@@ -145,13 +135,28 @@ button:focus-visible {
 }
 
 /* Estilos base */
-.app-container {
+.app-container, .react-select-container {
   color: var(--text-color);
 }
 
 .app-title {
   color: var(--text-color);
 }
+
+/* Estilos para los elementos select y options */
+select, react-select-container, react-select {
+  background-color: var(--select-bg);
+  color: var(--text-color);
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  padding: 10px 15px;
+  font-size: 16px;
+  margin: 5px 0;
+  width: 100%;
+}
+
+
+
 
 .selections-container {
   margin-bottom: 20px;
@@ -266,10 +271,10 @@ button:focus-visible {
 }
 
 .tonerSeleccionado {
-  color: black;
+  color: var(--text-color);
 }
 .react-select-container {
-  color: black;
+  color: var(--select-color);
 }
 /* Media Queries para Responsividad */
 

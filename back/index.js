@@ -22,12 +22,12 @@ app.post('/login', (req, res) => {
   const SECRET_KEY = process.env.SECRET_KEY;
   
   
-  console.log((usuario === usuarioCorrecto && password === passwordCorrecto));
+ 
   
   if (usuario === usuarioCorrecto && password === passwordCorrecto) {
     // Crear token
     const token = jwt.sign({ usuario }, SECRET_KEY, { expiresIn: '1h' });
-    console.log(token);
+    
     
     return res.json({ token });
   } else {
