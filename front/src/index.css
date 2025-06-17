@@ -355,3 +355,14 @@ select, react-select-container, react-select {
     max-width: 800px;
   }
 }
+
+
+
+
+
+.toners-container ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+

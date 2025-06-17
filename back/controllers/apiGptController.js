@@ -5,26 +5,22 @@ dotenv.config();
 
 const API = process.env.OPENAPI_API_KEY;
 
-
-async function obtenerPromptActivo() {
-  const connection = await conn.getConnection();
-  try {
-    const [rows] = await connection.query(
-      "SELECT prompt FROM prompt WHERE usarEste = true"
-    );
-    
-    return rows[0]?.prompt;
-  } finally {
-    connection.release();
-  }
-}
-const prompt = await obtenerPromptActivo();
-
-console.log(prompt);
-
 export const chatWithAI = async (req, res) => {
   const { message, context } = req.body;
+  async function obtenerPromptActivo() {
+    const connection = await conn.getConnection();
+    try {
+      const [rows] = await connection.query(
+        "SELECT prompt FROM prompt WHERE usarEste = true"
+      );
 
+      return rows[0]?.prompt;
+    } finally {
+      connection.release();
+    }
+  }
+  const prompt = await obtenerPromptActivo();
+  console.log(prompt);
   if (!message) {
     return res.status(400).json({
       success: false,
@@ -39,7 +35,6 @@ export const chatWithAI = async (req, res) => {
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-      
         model: "gpt-4o",
         messages: [
           {
@@ -112,5 +107,5 @@ export const chatWithAI = async (req, res) => {
         code: "INTERNAL_SERVER_ERROR",
       },
     });
-  } 
-}
+  }
+};

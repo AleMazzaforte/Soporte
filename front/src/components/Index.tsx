@@ -17,6 +17,17 @@ interface Impresora {
   idToner: string;
 }
 
+interface ModeloAgrupado {
+  nombre: string;
+  toners: {
+    id: number;
+    idToner: string;
+  }[];
+}
+interface TonerInfo {
+  nombre: string;
+  skus: string[]; // Para almacenar todos los SKUs
+}
 interface Marca {
   id: number;
   nombre: string;
@@ -40,55 +51,52 @@ const Index: React.FC = () => {
   });
 
   const customStyles = {
-  control: (provided: any, state: any) => ({
-    ...provided,
-    backgroundColor: 'var(--select-bg)',
-    borderColor: 'var(--input-border)',
-    color: 'var(--select-color)',
-    padding: '10px 15px',
-    fontSize: '16px',
-    borderRadius: '4px',
-    textAlign: 'left',
-    boxShadow: state.isFocused ? '0 0 0 2px rgba(100, 108, 255, 0.2)' : null,
-    '&:hover': {
-      borderColor: 'var(--primary-color)'
-    }
-  }),
-  menu: (provided: any) => ({
-    ...provided,
-    backgroundColor: 'var(--select-bg)',
-    color: 'var(--select-color)',
-    borderRadius: '4px',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-  }),
-  option: (provided: any, state: any) => ({
-    ...provided,
-    backgroundColor: state.isSelected
-      ? 'var(--primary-color)'
-      : state.isFocused
-      ? 'var(--chip-bg)'
-      : 'var(--select-option-bg)',
-    color: state.isSelected
-      ? '#fff'
-      : 'var(--select-option-color)',
-    padding: '8px 12px',
-    textAlign: 'left',
-    '&:active': {
-      backgroundColor: 'var(--primary-hover)',
-    },
-  }),
-  singleValue: (provided: any) => ({
-    ...provided,
-    color: 'var(--select-color)',
-    textAlign: 'left',
-  }),
-  input: (provided: any) => ({
-    ...provided,
-    color: 'var(--select-color)',
-    textAlign: 'left',
-  }),
-};
-
+    control: (provided: any, state: any) => ({
+      ...provided,
+      backgroundColor: "var(--select-bg)",
+      borderColor: "var(--input-border)",
+      color: "var(--select-color)",
+      padding: "10px 15px",
+      fontSize: "16px",
+      borderRadius: "4px",
+      textAlign: "left",
+      boxShadow: state.isFocused ? "0 0 0 2px rgba(100, 108, 255, 0.2)" : null,
+      "&:hover": {
+        borderColor: "var(--primary-color)",
+      },
+    }),
+    menu: (provided: any) => ({
+      ...provided,
+      backgroundColor: "var(--select-bg)",
+      color: "var(--select-color)",
+      borderRadius: "4px",
+      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+    }),
+    option: (provided: any, state: any) => ({
+      ...provided,
+      backgroundColor: state.isSelected
+        ? "var(--primary-color)"
+        : state.isFocused
+        ? "var(--chip-bg)"
+        : "var(--select-option-bg)",
+      color: state.isSelected ? "#fff" : "var(--select-option-color)",
+      padding: "8px 12px",
+      textAlign: "left",
+      "&:active": {
+        backgroundColor: "var(--primary-hover)",
+      },
+    }),
+    singleValue: (provided: any) => ({
+      ...provided,
+      color: "var(--select-color)",
+      textAlign: "left",
+    }),
+    input: (provided: any) => ({
+      ...provided,
+      color: "var(--select-color)",
+      textAlign: "left",
+    }),
+  };
 
   const [chatInput, setChatInput] = useState("");
   const [currentStep, setCurrentStep] = useState<
@@ -103,26 +111,31 @@ const Index: React.FC = () => {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [marcas, setMarcas] = useState<Marca[]>([]);
 
-  const [modelos, setModelos] = useState<Impresora[]>([]);
   const [isLoadingModelos, setIsLoadingModelos] = useState(false);
 
-  const [tonerInfo, setTonerInfo] = useState<{ nombre: string } | null>(null);
+  const [tonerInfo, setTonerInfo] = useState<TonerInfo | null>(null);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newModelName, setNewModelName] = useState("");
   const [newModelToner, setNewModelToner] = useState("");
   const [isHuman, setIsHuman] = useState(false);
   const [botCheck, setBotCheck] = useState("");
-  
+  const [modelosAgrupados, setModelosAgrupados] = useState<ModeloAgrupado[]>(
+    []
+  );
+  const [tonersDelModelo, setTonersDelModelo] = useState<{ idToner: string }[]>(
+    []
+  );
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-};
-
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+  
   useEffect(() => {
-  scrollToBottom();
-}, [chatMessages]);
+    scrollToBottom();
+  }, [chatMessages]);
 
   const handleSubmitModel = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,7 +207,6 @@ const Index: React.FC = () => {
         try {
           const response = await axios.get(`${urlBase}/listarMarcas`);
           setMarcas(response.data);
-          console.log("Marcas", response.data);
         } catch (error) {
           console.error("Error al cargar las marcas", error);
           setMarcas([]);
@@ -202,42 +214,76 @@ const Index: React.FC = () => {
       },
       medioCompra: () => setCurrentStep("impresora"),
       impresora: async () => {
-        setIsLoadingModelos(true);
-        try {
-          const marcaSeleccionada = marcas.find((m) => m.nombre === value);
-          if (marcaSeleccionada) {
-            const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
-            const response = await axios.get(`${endpoint}`);
-            setModelos(response.data.data || []);
+  setIsLoadingModelos(true);
+  try {
+    const marcaSeleccionada = marcas.find((m) => m.nombre === value);
+    if (marcaSeleccionada) {
+      const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
+      const response = await axios.get(`${endpoint}`);
+      const modelosData = response.data.data || [];
+
+      // Agrupar modelos por nombre
+      const modelosAgrupados = modelosData.reduce(
+        (acc: ModeloAgrupado[], curr: Impresora) => {
+          const modeloExistente = acc.find((m) => m.nombre === curr.nombre);
+          if (modeloExistente) {
+            modeloExistente.toners.push({
+              id: curr.id,
+              idToner: curr.idToner,
+            });
+          } else {
+            acc.push({
+              nombre: curr.nombre,
+              toners: [{
+                id: curr.id,
+                idToner: curr.idToner,
+              }],
+            });
           }
-        } catch (error) {
-          console.error(`Error al cargar modelos ${value}`, error);
-          setModelos([]);
-        } finally {
-          setIsLoadingModelos(false);
-        }
-        setCurrentStep("modelo");
-      },
+          return acc;
+        },
+        []
+      );
+
+      setModelosAgrupados(modelosAgrupados);
+    }
+  } catch (error) {
+    console.error(`Error al cargar modelos ${value}`, error);
+    setModelosAgrupados([]);
+  } finally {
+    setIsLoadingModelos(false);
+  }
+  setCurrentStep("modelo");
+},
       modelo: async () => {
-        const modeloSeleccionado = modelos.find((m) => m.nombre === value);
-        if (modeloSeleccionado) {
-          try {
-            const response = await axios.get(
-              `${urlBase}/sku/${modeloSeleccionado.idToner}`
-            );
-            setTonerInfo(response.data.data);
-          } catch (error) {
-            console.error("Error al cargar información del toner", error);
-            setTonerInfo(null);
-          }
-        }
-        setCurrentStep("tonerCorrecto");
-      },
+  const modeloSeleccionado = modelosAgrupados.find(m => m.nombre === value);
+  if (modeloSeleccionado) {
+    try {
+      // Obtener todos los SKUs para este modelo
+      const skusPromises = modeloSeleccionado.toners.map(toner => 
+        axios.get(`${urlBase}/sku/${toner.idToner}`)
+      );
+      
+      const responses = await Promise.all(skusPromises);
+      const skus = responses.map(res => res.data.data.nombre);
+      
+      setTonerInfo({
+        nombre: modeloSeleccionado.nombre,
+        skus: skus
+      });
+      
+      setTonersDelModelo(modeloSeleccionado.toners);
+      setCurrentStep("tonerCorrecto");
+    } catch (error) {
+      console.error("Error al cargar información de los toners", error);
+      setTonerInfo(null);
+    }
+  }
+},
       tonerCorrecto: () => {
         if (value === "Sí") {
           setCurrentStep("falla");
         } else {
-          
           setChatMessages([
             {
               sender: "bot",
@@ -246,7 +292,7 @@ const Index: React.FC = () => {
               timestamp: new Date().toISOString(),
             },
           ]);
-          setCurrentStep("chat"); 
+          setCurrentStep("chat");
         }
       },
       falla: () => setCurrentStep("chat"),
@@ -341,9 +387,7 @@ const Index: React.FC = () => {
     step: keyof typeof selections
   ) => (
     <div className="selection-chip">
-      <span>
-         {value}
-      </span>
+      <span>{value}</span>
       <button onClick={() => goBack(step)}>✕</button>
     </div>
   );
@@ -353,26 +397,15 @@ const Index: React.FC = () => {
       <h1 className="app-title">Centro de Soporte Técnico</h1>
 
       <div className="selections-container">
-        {selections.pais &&
-          renderSelectionChip(selections.pais, "pais")}
+        {selections.pais && renderSelectionChip(selections.pais, "pais")}
         {selections.medioCompra &&
-          renderSelectionChip(
-  
-            selections.medioCompra,
-            "medioCompra"
-          )}
+          renderSelectionChip(selections.medioCompra, "medioCompra")}
         {selections.impresora &&
-          renderSelectionChip( selections.impresora, "impresora")}
-        {selections.modelo &&
-          renderSelectionChip( selections.modelo, "modelo")}
+          renderSelectionChip(selections.impresora, "impresora")}
+        {selections.modelo && renderSelectionChip(selections.modelo, "modelo")}
         {selections.tonerCorrecto &&
-          renderSelectionChip(
-            
-            selections.tonerCorrecto,
-            "tonerCorrecto"
-          )}
-        {selections.falla &&
-          renderSelectionChip( selections.falla, "falla")}
+          renderSelectionChip(selections.tonerCorrecto, "tonerCorrecto")}
+        {selections.falla && renderSelectionChip(selections.falla, "falla")}
       </div>
 
       {currentStep !== "chat" && (
@@ -426,12 +459,14 @@ const Index: React.FC = () => {
 
           {currentStep === "modelo" && (
             <>
-              <h2 className="app-title">Selecciona tu modelo de impresora {selections.impresora}</h2>
+              <h2 className="app-title">
+                Selecciona tu modelo de impresora {selections.impresora}
+              </h2>
               <Select
                 styles={customStyles}
-                options={modelos.map((impresora) => ({
-                  value: impresora.nombre,
-                  label: impresora.nombre,
+                options={modelosAgrupados.map((modelo) => ({
+                  value: modelo.nombre,
+                  label: modelo.nombre,
                 }))}
                 isLoading={isLoadingModelos}
                 noOptionsMessage={() => (
@@ -445,14 +480,30 @@ const Index: React.FC = () => {
                 placeholder="Busca tu modelo..."
                 onChange={(selectedOption) => {
                   if (selectedOption) {
-                    handleSelection("modelo", selectedOption.value);
+                    const modeloSeleccionado = modelosAgrupados.find(
+                      (m) => m.nombre === selectedOption.value
+                    );
+                    if (modeloSeleccionado) {
+                      setTonersDelModelo(modeloSeleccionado.toners);
+                      handleSelection("modelo", selectedOption.value);
+                    }
                   }
                 }}
                 className="react-select-container"
                 classNamePrefix="react-select"
               />
 
-              {/* Modal */}
+              {/* Mostrar todos los toners del modelo seleccionado */}
+              {selections.modelo && tonersDelModelo.length > 0 && (
+                <div className="toners-container">
+                  <h3>Cartuchos compatibles:</h3>
+                  <ul>
+                    {tonersDelModelo.map((toner, index) => (
+                      <li key={index}>SKU: {toner.idToner}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               {isModalOpen && (
                 <div className="modal-overlay">
                   <div className="modal-content">
@@ -498,7 +549,7 @@ const Index: React.FC = () => {
                         type="text"
                         value={botCheck}
                         onChange={(e) => setBotCheck(e.target.value)}
-                        className="honeypot-input" // Clase CSS para ocultarlo
+                        className="honeypot-input" 
                       />
                       <div className="modal-buttons">
                         <button type="submit">Guardar</button>
@@ -518,18 +569,22 @@ const Index: React.FC = () => {
 
           {currentStep === "tonerCorrecto" && tonerInfo && (
             <>
-              <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-3xl mt-4 text-center">
-                <h2>Cartucho compatible</h2>
-                <p className="tonerSeleccionado">{tonerInfo.nombre}</p>
-                <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-                  ¿Es el cartucho que compraste?
-                </h2>
+              <div>
+                <h2>Modelo seleccionado: {tonerInfo.nombre}</h2>
+                <div className="toners-container">
+                  <h3>Cartuchos compatibles:</h3>
+                  <ul>
+                    {tonerInfo.skus.map((sku, index) => (
+                      <li key={index}>{sku}</li>
+                    ))}
+                  </ul>
+                </div>
+                <h2>¿El producto que compraste aparece en la lista?</h2>
                 <select
                   value={selections.tonerCorrecto}
                   onChange={(e) =>
                     handleSelection("tonerCorrecto", e.target.value)
                   }
-                  className="w-full p-2 border rounded"
                 >
                   <option value="">Seleccione una opción</option>
                   <option value="Sí">Sí</option>
@@ -541,11 +596,8 @@ const Index: React.FC = () => {
 
           {currentStep === "falla" && (
             <>
-              <h2 className="text-2xl font-semibold text-gray-700 mb-4">
-                Selecciona la falla
-              </h2>
+              <h2>Selecciona la falla</h2>
               <select
-                className="w-full p-2 border rounded"
                 value={selections.falla}
                 onChange={(e) => handleSelection("falla", e.target.value)}
               >
