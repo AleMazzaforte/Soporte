@@ -152,7 +152,8 @@ const Index: React.FC = () => {
     }
     if (botCheck !== "") {
       setIsModalOpen(false);
-
+ console.log(tonersDelModelo);
+ 
       return;
     }
 
