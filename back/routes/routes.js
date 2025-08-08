@@ -4,6 +4,7 @@ import { listarMarcas } from "../controllers/marcasController.js";
 import impresorasController from "../controllers/impresorasController.js";
 import tonersController from "../controllers/tonersController.js";
 import promptsController from "../controllers/promptsController.js";
+import consultaController from "../controllers/consultaController.js";
 
 
 
@@ -33,6 +34,10 @@ router.get("/getPrompts", promptsController.getPrompts);
 router.post("/postPrompts", promptsController.postCrearPrompt);
 router.put("/prompts/:id", promptsController.putActualizarPrompt);
 router.delete("/prompts/:id", promptsController.deleteEliminarPrompt);
+
+// Ruta para consulta
+router.post("/guardarConsulta", consultaController.postGuardarConsulta);
+
 
 
 export default router;
