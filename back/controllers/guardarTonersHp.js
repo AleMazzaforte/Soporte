@@ -21,7 +21,7 @@ async function insertarToners() {
   try {
     // Obtener conexión desde el pool
     connection = await conn.getConnection();
-    console.log('Conexión a la base de datos establecida');
+    
 
     // Iniciar transacción
     await connection.beginTransaction();
@@ -33,10 +33,10 @@ async function insertarToners() {
     for (const modelo of modelosTonersHP) {
       try {
         await connection.query(query, [modelo]);
-        console.log(`✓ Insertado: ${modelo}`);
+        
       } catch (error) {
         if (error.code === 'ER_DUP_ENTRY') {
-          console.log(`⏩ Ya existía: ${modelo} (omitido)`);
+         
         } else {
           throw error; // Relanzar otros errores
         }
@@ -45,7 +45,7 @@ async function insertarToners() {
 
     // Confirmar transacción
     await connection.commit();
-    console.log('✅ Todos los toners HP han sido procesados correctamente');
+   
   } catch (error) {
     // Revertir en caso de error
     if (connection) await connection.rollback();
@@ -54,7 +54,7 @@ async function insertarToners() {
     // Liberar conexión
     if (connection) {
       connection.release();
-      console.log('🔌 Conexión liberada');
+      
     }
   }
 }

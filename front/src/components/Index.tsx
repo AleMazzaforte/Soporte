@@ -77,8 +77,8 @@ const Index: React.FC = () => {
       backgroundColor: state.isSelected
         ? "var(--primary-color)"
         : state.isFocused
-        ? "var(--chip-bg)"
-        : "var(--select-option-bg)",
+          ? "var(--chip-bg)"
+          : "var(--select-option-bg)",
       color: state.isSelected ? "#fff" : "var(--select-option-color)",
       padding: "8px 12px",
       textAlign: "left",
@@ -132,7 +132,7 @@ const Index: React.FC = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-  
+
   useEffect(() => {
     scrollToBottom();
   }, [chatMessages]);
@@ -214,72 +214,83 @@ const Index: React.FC = () => {
       },
       medioCompra: () => setCurrentStep("impresora"),
       impresora: async () => {
-  setIsLoadingModelos(true);
-  try {
-    const marcaSeleccionada = marcas.find((m) => m.nombre === value);
-    if (marcaSeleccionada) {
-      const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
-      const response = await axios.get(`${endpoint}`);
-      const modelosData = response.data.data || [];
+        setIsLoadingModelos(true);
+        try {
+          const marcaSeleccionada = marcas.find((m) => m.nombre === value);
+          if (marcaSeleccionada) {
+            const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
+            const response = await axios.get(`${endpoint}`);
+            const modelosData = response.data.data || [];
 
-      // Agrupar modelos por nombre
-      const modelosAgrupados = modelosData.reduce(
-        (acc: ModeloAgrupado[], curr: Impresora) => {
-          const modeloExistente = acc.find((m) => m.nombre === curr.nombre);
-          if (modeloExistente) {
-            modeloExistente.toners.push({
-              id: curr.id,
-              idToner: curr.idToner,
-            });
-          } else {
-            acc.push({
-              nombre: curr.nombre,
-              toners: [{
-                id: curr.id,
-                idToner: curr.idToner,
-              }],
-            });
+            // Agrupar modelos por nombre
+            const modelosAgrupados = modelosData.reduce(
+              (acc: ModeloAgrupado[], curr: Impresora) => {
+                const modeloExistente = acc.find((m) => m.nombre === curr.nombre);
+                if (modeloExistente) {
+                  modeloExistente.toners.push({
+                    id: curr.id,
+                    idToner: curr.idToner,
+                  });
+                } else {
+                  acc.push({
+                    nombre: curr.nombre,
+                    toners: [{
+                      id: curr.id,
+                      idToner: curr.idToner,
+                    }],
+                  });
+                }
+                return acc;
+              },
+              []
+            );
+
+            setModelosAgrupados(modelosAgrupados);
           }
-          return acc;
-        },
-        []
-      );
-
-      setModelosAgrupados(modelosAgrupados);
-    }
-  } catch (error) {
-    console.error(`Error al cargar modelos ${value}`, error);
-    setModelosAgrupados([]);
-  } finally {
-    setIsLoadingModelos(false);
-  }
-  setCurrentStep("modelo");
-},
+        } catch (error) {
+          console.error(`Error al cargar modelos ${value}`, error);
+          setModelosAgrupados([]);
+        } finally {
+          setIsLoadingModelos(false);
+        }
+        setCurrentStep("modelo");
+      },
       modelo: async () => {
-  const modeloSeleccionado = modelosAgrupados.find(m => m.nombre === value);
-  if (modeloSeleccionado) {
-    try {
-      // Obtener todos los SKUs para este modelo
-      const skusPromises = modeloSeleccionado.toners.map(toner => 
-        axios.get(`${urlBase}/sku/${toner.idToner}`)
-      );
-      
-      const responses = await Promise.all(skusPromises);
-      const skus = responses.map(res => res.data.data.nombre);
-      
-      setTonerInfo({
-        nombre: modeloSeleccionado.nombre,
-        skus: skus
-      });
-      
-      setTonersDelModelo(modeloSeleccionado.toners);
-      setCurrentStep("tonerCorrecto");
-    } catch (error) {
-      console.error("Error al cargar información de los toners", error);
-      setTonerInfo(null);
-    }
-  }
-},
+        const modeloSeleccionado = modelosAgrupados.find(m => m.nombre === value);
+        if (modeloSeleccionado) {
+          try {
+            // Obtener todos los SKUs para este modelo
+            const skusPromises = modeloSeleccionado.toners.map(toner =>
+              axios.get(`${urlBase}/sku/${toner.idToner}`)
+            );
+
+            const responses = await Promise.all(skusPromises);
+
+            // Extraer nombres y eliminar duplicados
+            const skus = [
+              ...new Set(responses.map(res => res.data.data.nombre))
+            ];
+
+            setTonerInfo({
+              nombre: modeloSeleccionado.nombre,
+              skus: skus
+            });
+
+            // Eliminar duplicados por idToner
+            const tonersUnicos = Array.from(
+              new Map(
+                modeloSeleccionado.toners.map(t => [t.idToner, t])
+              ).values()
+            );
+
+            setTonersDelModelo(tonersUnicos);
+            setCurrentStep("tonerCorrecto");
+          } catch (error) {
+            console.error("Error al cargar información de los toners", error);
+            setTonerInfo(null);
+          }
+        }
+      },
       tonerCorrecto: () => {
         if (value === "Sí") {
           setCurrentStep("falla");
@@ -464,28 +475,46 @@ const Index: React.FC = () => {
               </h2>
               <Select
                 styles={customStyles}
-                options={modelosAgrupados.map((modelo) => ({
-                  value: modelo.nombre,
-                  label: modelo.nombre,
-                }))}
+                options={[
+                  ...modelosAgrupados.map((modelo) => ({
+                    value: modelo.nombre,
+                    label: modelo.nombre,
+                  })),
+                  // Añadimos la opción especial sin propiedades extra
+                  { value: "no-encontrado", label: "No está mi modelo de impresora" },
+                ]}
+                value={
+                  selections.modelo && selections.modelo !== "no-encontrado"
+                    ? { value: selections.modelo, label: selections.modelo }
+                    : null
+                }
                 isLoading={isLoadingModelos}
-                noOptionsMessage={() => (
-                  <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="add-model-button"
-                  >
-                    No encuentro mi modelo, agregar nuevo
-                  </button>
-                )}
                 placeholder="Busca tu modelo..."
+                formatOptionLabel={(option) => {
+                  // Opcional: estilizar la opción de "no encontrado"
+                  if (option.value === "no-encontrado") {
+                    return (
+                      <span style={{ fontStyle: "italic", color: "var(--primary-color)" }}>
+                        {option.label}
+                      </span>
+                    );
+                  }
+                  return option.label;
+                }}
                 onChange={(selectedOption) => {
                   if (selectedOption) {
-                    const modeloSeleccionado = modelosAgrupados.find(
-                      (m) => m.nombre === selectedOption.value
-                    );
-                    if (modeloSeleccionado) {
-                      setTonersDelModelo(modeloSeleccionado.toners);
-                      handleSelection("modelo", selectedOption.value);
+                    if (selectedOption.value === "no-encontrado") {
+                      // Abrir modal
+                      setIsModalOpen(true);
+                    } else {
+                      // Procesar modelo normal
+                      const modeloSeleccionado = modelosAgrupados.find(
+                        (m) => m.nombre === selectedOption.value
+                      );
+                      if (modeloSeleccionado) {
+                        setTonersDelModelo(modeloSeleccionado.toners);
+                        handleSelection("modelo", selectedOption.value);
+                      }
                     }
                   }
                 }}
@@ -494,20 +523,10 @@ const Index: React.FC = () => {
               />
 
               {/* Mostrar todos los toners del modelo seleccionado */}
-              {selections.modelo && tonersDelModelo.length > 0 && (
-                <div className="toners-container">
-                  <h3>Cartuchos compatibles:</h3>
-                  <ul>
-                    {tonersDelModelo.map((toner, index) => (
-                      <li key={index}>SKU: {toner.idToner}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
               {isModalOpen && (
                 <div className="modal-overlay">
                   <div className="modal-content">
-                    <h3>Agregar nuevo modelo</h3>
+                    <h3>Por favor agregar modelo</h3>
                     <form onSubmit={handleSubmitModel}>
                       <label style={{ paddingLeft: "15px" }}>Impresora </label>
                       <input
@@ -549,7 +568,7 @@ const Index: React.FC = () => {
                         type="text"
                         value={botCheck}
                         onChange={(e) => setBotCheck(e.target.value)}
-                        className="honeypot-input" 
+                        className="honeypot-input"
                       />
                       <div className="modal-buttons">
                         <button type="submit">Guardar</button>
@@ -574,8 +593,8 @@ const Index: React.FC = () => {
                 <div className="toners-container">
                   <h3>Cartuchos compatibles:</h3>
                   <ul>
-                    {tonerInfo.skus.map((sku, index) => (
-                      <li key={index}>{sku}</li>
+                    {tonerInfo.skus.map((sku) => (
+                      <li key={sku}>{sku}</li>
                     ))}
                   </ul>
                 </div>
@@ -631,9 +650,8 @@ const Index: React.FC = () => {
               chatMessages.map((msg, index) => (
                 <div
                   key={`${msg.timestamp || index}-${msg.sender}`}
-                  className={`message ${msg.sender} ${
-                    msg.isError ? "error" : ""
-                  }`}
+                  className={`message ${msg.sender} ${msg.isError ? "error" : ""
+                    }`}
                 >
                   {msg.text}
                   {msg.isError && (

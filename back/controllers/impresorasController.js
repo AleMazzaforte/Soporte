@@ -20,7 +20,7 @@ const impresorasController = {
       const query =
         "SELECT id, nombre, idToner FROM ?? ORDER BY nombre";
       const [rows] = await connection.query(query, [nombreTabla]);
-      console.log("Rows obtenidas:", rows);
+      
       
       res.json({
         success: true,

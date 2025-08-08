@@ -3,9 +3,13 @@ import dotenv from "dotenv";
 import conn from "../db/db.js";
 dotenv.config();
 
-const API = process.env.OPENAPI_API_KEY;
+const API = process.env.OPENAI_API_KEY;
 
 export const chatWithAI = async (req, res) => {
+  if (!API || API === undefined) {
+    console.log(API);
+    
+    return}
   const { message, context } = req.body;
   async function obtenerPromptActivo() {
     const connection = await conn.getConnection();
@@ -20,7 +24,7 @@ export const chatWithAI = async (req, res) => {
     }
   }
   const prompt = await obtenerPromptActivo();
-  console.log(prompt);
+  //console.log(prompt);
   if (!message) {
     return res.status(400).json({
       success: false,
