@@ -3,7 +3,7 @@ import axios from "axios";
 import Select from "react-select";
 import Endpoints from "../utilities/Endpoints";
 import Urls from "../utilities/Urls";
-
+// Importacion del archivo de estilos 
 import "../styles.css";
 
 let urlBase = Endpoints.URLPROD;
@@ -454,8 +454,9 @@ const Index: React.FC = () => {
       console.error(error);
     }
   };
-  // ---------------------------------------------
-
+  //-----------------------------------------------------------
+  // DE ACA PARA ABAJO ES LA PARTE QUE RENDERIZA EL CODIGO HTML
+  //-----------------------------------------------------------
   return (
     <div className="app-container">
       <h1 className="app-title">Centro de Soporte Técnico</h1>
@@ -701,7 +702,7 @@ const Index: React.FC = () => {
                   {msg.text}
                   {msg.isError && (
                     <div className="error-hint">
-                      Intenta nuevamente o contacta a soporte
+                      Intenta nuevamente o contacta a <a href="https://www.blowink.com.ar/index.html#form02-6" className="soporte-contacto">soporte.</a> 
                     </div>
                   )}
                 </div>
