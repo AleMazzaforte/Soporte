@@ -7,7 +7,7 @@ const API = process.env.OPENAI_API_KEY;
 
 export const chatWithAI = async (req, res) => {
   if (!API || API === undefined) {
-    console.log(API);
+    console.log( 'apikey',  API);
     
     return}
   const { message, context } = req.body;

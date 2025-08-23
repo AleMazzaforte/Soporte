@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import Select from "react-select";
 import Endpoints from "../utilities/Endpoints";
-import Urls from "../utilities/Urls";
-// Importacion del archivo de estilos 
+
 import "../styles.css";
 
 let urlBase = Endpoints.URLPROD;
@@ -44,7 +43,7 @@ interface ChatMessage {
 const Index: React.FC = () => {
   const [selections, setSelections] = useState({
     pais: "",
-    medio_compra: "",
+    medioCompra: "",
     impresora: "",
     modelo: "",
     tonerCorrecto: "",
@@ -78,8 +77,8 @@ const Index: React.FC = () => {
       backgroundColor: state.isSelected
         ? "var(--primary-color)"
         : state.isFocused
-          ? "var(--chip-bg)"
-          : "var(--select-option-bg)",
+        ? "var(--chip-bg)"
+        : "var(--select-option-bg)",
       color: state.isSelected ? "#fff" : "var(--select-option-color)",
       padding: "8px 12px",
       textAlign: "left",
@@ -102,7 +101,7 @@ const Index: React.FC = () => {
   const [chatInput, setChatInput] = useState("");
   const [currentStep, setCurrentStep] = useState<
     | "pais"
-    | "medio_compra"
+    | "medioCompra"
     | "impresora"
     | "modelo"
     | "tonerCorrecto"
@@ -128,32 +127,15 @@ const Index: React.FC = () => {
     []
   );
 
-  const [email, setEmail] = useState("");
-  const [showEmailForm, setShowEmailForm] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
-
-
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  //Urls
-  let guardarConsulta = Urls.consultas.guardar
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-
+  
   useEffect(() => {
     scrollToBottom();
   }, [chatMessages]);
-
-  // --- NUEVO: Detectar primera respuesta del bot ---
-  useEffect(() => {
-    const firstBotMessage = chatMessages.find(m => m.sender === "bot" && !m.isError);
-    if (firstBotMessage && !showEmailForm && !isSaved) {
-      setShowEmailForm(true);
-    }
-  }, [chatMessages, showEmailForm, isSaved]);
-  // -----------------------------------------------
 
   const handleSubmitModel = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,7 +152,7 @@ const Index: React.FC = () => {
     }
     if (botCheck !== "") {
       setIsModalOpen(false);
-      console.log(tonersDelModelo);
+
       return;
     }
 
@@ -221,7 +203,7 @@ const Index: React.FC = () => {
     setSelections((prev) => ({ ...prev, [key]: value }));
     const stepHandlers = {
       pais: async () => {
-        setCurrentStep("medio_compra");
+        setCurrentStep("medioCompra");
         try {
           const response = await axios.get(`${urlBase}/listarMarcas`);
           setMarcas(response.data);
@@ -230,85 +212,74 @@ const Index: React.FC = () => {
           setMarcas([]);
         }
       },
-      medio_compra: () => setCurrentStep("impresora"),
+      medioCompra: () => setCurrentStep("impresora"),
       impresora: async () => {
-        setIsLoadingModelos(true);
-        try {
-          const marcaSeleccionada = marcas.find((m) => m.nombre === value);
-          if (marcaSeleccionada) {
-            const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
-            const response = await axios.get(`${endpoint}`);
-            const modelosData = response.data.data || [];
+  setIsLoadingModelos(true);
+  try {
+    const marcaSeleccionada = marcas.find((m) => m.nombre === value);
+    if (marcaSeleccionada) {
+      const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
+      const response = await axios.get(`${endpoint}`);
+      const modelosData = response.data.data || [];
 
-            // Agrupar modelos por nombre
-            const modelosAgrupados = modelosData.reduce(
-              (acc: ModeloAgrupado[], curr: Impresora) => {
-                const modeloExistente = acc.find((m) => m.nombre === curr.nombre);
-                if (modeloExistente) {
-                  modeloExistente.toners.push({
-                    id: curr.id,
-                    idToner: curr.idToner,
-                  });
-                } else {
-                  acc.push({
-                    nombre: curr.nombre,
-                    toners: [{
-                      id: curr.id,
-                      idToner: curr.idToner,
-                    }],
-                  });
-                }
-                return acc;
-              },
-              []
-            );
-
-            setModelosAgrupados(modelosAgrupados);
-          }
-        } catch (error) {
-          console.error(`Error al cargar modelos ${value}`, error);
-          setModelosAgrupados([]);
-        } finally {
-          setIsLoadingModelos(false);
-        }
-        setCurrentStep("modelo");
-      },
-      modelo: async () => {
-        const modeloSeleccionado = modelosAgrupados.find(m => m.nombre === value);
-        if (modeloSeleccionado) {
-          try {
-            // Obtener todos los SKUs para este modelo
-            const skusPromises = modeloSeleccionado.toners.map(toner =>
-              axios.get(`${urlBase}/sku/${toner.idToner}`)
-            );
-
-            const responses = await Promise.all(skusPromises);
-
-            // Extraer nombres y eliminar duplicados
-            const skus = [
-              ...new Set(responses.map(res => res.data.data.nombre))
-            ];
-
-            setTonerInfo({
-              nombre: modeloSeleccionado.nombre,
-              skus: skus
+      // Agrupar modelos por nombre
+      const modelosAgrupados = modelosData.reduce(
+        (acc: ModeloAgrupado[], curr: Impresora) => {
+          const modeloExistente = acc.find((m) => m.nombre === curr.nombre);
+          if (modeloExistente) {
+            modeloExistente.toners.push({
+              id: curr.id,
+              idToner: curr.idToner,
             });
-
-            // Eliminar duplicados por idToner
-            const tonersUnicos = Array.from(
-              new Map(
-                modeloSeleccionado.toners.map(t => [t.idToner, t])
-              ).values()
-            );
-
-            setTonersDelModelo(tonersUnicos);
-            setCurrentStep("tonerCorrecto");
-          } catch (error) {
-            console.error("Error al cargar información de los toners", error);
-            setTonerInfo(null);
+          } else {
+            acc.push({
+              nombre: curr.nombre,
+              toners: [{
+                id: curr.id,
+                idToner: curr.idToner,
+              }],
+            });
           }
-        }
-      },
+          return acc;
+        },
+        []
+      );
+
+      setModelosAgrupados(modelosAgrupados);
+    }
+  } catch (error) {
+    console.error(`Error al cargar modelos ${value}`, error);
+    setModelosAgrupados([]);
+  } finally {
+    setIsLoadingModelos(false);
+  }
+  setCurrentStep("modelo");
+},
+      modelo: async () => {
+  const modeloSeleccionado = modelosAgrupados.find(m => m.nombre === value);
+  if (modeloSeleccionado) {
+    try {
+      // Obtener todos los SKUs para este modelo
+      const skusPromises = modeloSeleccionado.toners.map(toner => 
+        axios.get(`${urlBase}/sku/${toner.idToner}`)
+      );
+      
+      const responses = await Promise.all(skusPromises);
+      const skus = responses.map(res => res.data.data.nombre);
+      
+      setTonerInfo({
+        nombre: modeloSeleccionado.nombre,
+        skus: skus
+      });
+      
+      setTonersDelModelo(modeloSeleccionado.toners);
+      setCurrentStep("tonerCorrecto");
+    } catch (error) {
+      console.error("Error al cargar información de los toners", error);
+      setTonerInfo(null);
+    }
+  }
+},
       tonerCorrecto: () => {
         if (value === "Sí") {
           setCurrentStep("falla");
@@ -421,50 +392,14 @@ const Index: React.FC = () => {
     </div>
   );
 
-  // Guardar consulta ---
-  const handleSaveConsulta = async () => {
-    if (!email.trim()) {
-      alert("Por favor ingresa tu email");
-      return;
-    }
-
-    const data = {
-      pais: selections.pais,
-      medio_compra: selections.medio_compra,
-      marca: selections.impresora,
-      modelo: selections.modelo,
-      falla: selections.falla,
-      email: email.trim(),
-      chat: chatMessages,
-    };
-
-    try {
-      const response = await axios.post(`${guardarConsulta}`, data, {
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (response.data.success) {
-        setIsSaved(true);
-        setShowEmailForm(false);
-      } else {
-        throw new Error(response.data.error?.message || "Error al guardar");
-      }
-    } catch (error) {
-      alert("Error al guardar la conversación. Intenta nuevamente.");
-      console.error(error);
-    }
-  };
-  //-----------------------------------------------------------
-  // DE ACA PARA ABAJO ES LA PARTE QUE RENDERIZA EL CODIGO HTML
-  //-----------------------------------------------------------
   return (
     <div className="app-container">
       <h1 className="app-title">Centro de Soporte Técnico</h1>
 
       <div className="selections-container">
         {selections.pais && renderSelectionChip(selections.pais, "pais")}
-        {selections.medio_compra &&
-          renderSelectionChip(selections.medio_compra, "medio_compra")}
+        {selections.medioCompra &&
+          renderSelectionChip(selections.medioCompra, "medioCompra")}
         {selections.impresora &&
           renderSelectionChip(selections.impresora, "impresora")}
         {selections.modelo && renderSelectionChip(selections.modelo, "modelo")}
@@ -490,12 +425,12 @@ const Index: React.FC = () => {
             </>
           )}
 
-          {currentStep === "medio_compra" && (
+          {currentStep === "medioCompra" && (
             <>
               <h2 className="app-title">¿Por qué medio compraste?</h2>
               <select
-                value={selections.medio_compra}
-                onChange={(e) => handleSelection("medio_compra", e.target.value)}
+                value={selections.medioCompra}
+                onChange={(e) => handleSelection("medioCompra", e.target.value)}
               >
                 <option value="">Seleccione un medio</option>
                 <option value="Mercado Libre">Mercado Libre</option>
@@ -529,42 +464,28 @@ const Index: React.FC = () => {
               </h2>
               <Select
                 styles={customStyles}
-                options={[
-                  ...modelosAgrupados.map((modelo) => ({
-                    value: modelo.nombre,
-                    label: modelo.nombre,
-                  })),
-                  { value: "no-encontrado", label: "No está mi modelo de impresora" },
-                ]}
-                value={
-                  selections.modelo && selections.modelo !== "no-encontrado"
-                    ? { value: selections.modelo, label: selections.modelo }
-                    : null
-                }
+                options={modelosAgrupados.map((modelo) => ({
+                  value: modelo.nombre,
+                  label: modelo.nombre,
+                }))}
                 isLoading={isLoadingModelos}
+                noOptionsMessage={() => (
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="add-model-button"
+                  >
+                    No encuentro mi modelo, agregar nuevo
+                  </button>
+                )}
                 placeholder="Busca tu modelo..."
-                formatOptionLabel={(option) => {
-                  if (option.value === "no-encontrado") {
-                    return (
-                      <span style={{ fontStyle: "italic", color: "var(--primary-color)" }}>
-                        {option.label}
-                      </span>
-                    );
-                  }
-                  return option.label;
-                }}
                 onChange={(selectedOption) => {
                   if (selectedOption) {
-                    if (selectedOption.value === "no-encontrado") {
-                      setIsModalOpen(true);
-                    } else {
-                      const modeloSeleccionado = modelosAgrupados.find(
-                        (m) => m.nombre === selectedOption.value
-                      );
-                      if (modeloSeleccionado) {
-                        setTonersDelModelo(modeloSeleccionado.toners);
-                        handleSelection("modelo", selectedOption.value);
-                      }
+                    const modeloSeleccionado = modelosAgrupados.find(
+                      (m) => m.nombre === selectedOption.value
+                    );
+                    if (modeloSeleccionado) {
+                      setTonersDelModelo(modeloSeleccionado.toners);
+                      handleSelection("modelo", selectedOption.value);
                     }
                   }
                 }}
@@ -572,10 +493,21 @@ const Index: React.FC = () => {
                 classNamePrefix="react-select"
               />
 
+              {/* Mostrar todos los toners del modelo seleccionado */}
+              {selections.modelo && tonersDelModelo.length > 0 && (
+                <div className="toners-container">
+                  <h3>Cartuchos compatibles:</h3>
+                  <ul>
+                    {tonersDelModelo.map((toner, index) => (
+                      <li key={index}>SKU: {toner.idToner}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               {isModalOpen && (
                 <div className="modal-overlay">
                   <div className="modal-content">
-                    <h3>Por favor agregar modelo</h3>
+                    <h3>Agregar nuevo modelo</h3>
                     <form onSubmit={handleSubmitModel}>
                       <label style={{ paddingLeft: "15px" }}>Impresora </label>
                       <input
@@ -602,6 +534,7 @@ const Index: React.FC = () => {
                       />
                       <br />
                       <br />
+                      {/* Checkbox "No soy un robot" */}
                       <label className="human-check-label">
                         <input
                           type="checkbox"
@@ -611,11 +544,12 @@ const Index: React.FC = () => {
                         Soy un humano
                       </label>
 
+                      {/* Campo oculto honeypot (solo bots lo rellenan) */}
                       <input
                         type="text"
                         value={botCheck}
                         onChange={(e) => setBotCheck(e.target.value)}
-                        className="honeypot-input"
+                        className="honeypot-input" 
                       />
                       <div className="modal-buttons">
                         <button type="submit">Guardar</button>
@@ -640,8 +574,8 @@ const Index: React.FC = () => {
                 <div className="toners-container">
                   <h3>Cartuchos compatibles:</h3>
                   <ul>
-                    {tonerInfo.skus.map((sku) => (
-                      <li key={sku}>{sku}</li>
+                    {tonerInfo.skus.map((sku, index) => (
+                      <li key={index}>{sku}</li>
                     ))}
                   </ul>
                 </div>
@@ -697,36 +631,21 @@ const Index: React.FC = () => {
               chatMessages.map((msg, index) => (
                 <div
                   key={`${msg.timestamp || index}-${msg.sender}`}
-                  className={`message ${msg.sender} ${msg.isError ? "error" : ""}`}
+                  className={`message ${msg.sender} ${
+                    msg.isError ? "error" : ""
+                  }`}
                 >
                   {msg.text}
                   {msg.isError && (
                     <div className="error-hint">
-                      Intenta nuevamente o contacta a <a href="https://www.blowink.com.ar/index.html#form02-6" className="soporte-contacto">soporte.</a> 
+                      Intenta nuevamente o contacta a soporte
                     </div>
                   )}
                 </div>
               ))
             )}
             <div ref={messagesEndRef} />
-
-            
-            {isSaved && (
-              <div style={{
-                marginTop: '20px',
-                padding: '15px',
-                backgroundColor: '#d4edda',
-                color: '#155724',
-                borderRadius: '8px',
-                textAlign: 'center',
-                fontWeight: 'bold'
-              }}>
-                ✅ ¡Gracias! Tu caso fue guardado. Pronto recibirás una respuesta.
-              </div>
-            )}
-            {/* ----------------------------- */}
           </div>
-
           <div className="chat-input-area">
             <input
               type="text"
@@ -746,50 +665,6 @@ const Index: React.FC = () => {
           </div>
         </div>
       )}
-      {/* --- FORMULARIO DE EMAIL --- */}
-            {showEmailForm && !isSaved && (
-              <div style={{
-                marginTop: '20px',
-                padding: '15px',
-                backgroundColor: 'var(--chip-bg)',
-                borderRadius: '8px',
-                textAlign: 'center'
-              }}>
-                <h3 style={{ margin: '0 0 10px 0' }}>Ingresa tu email para finalizar</h3>
-                <input
-                  type="email"
-                  placeholder="tu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  style={{
-                    padding: '10px',
-                    width: '80%',
-                    maxWidth: '300px',
-                    margin: '10px 0',
-                    border: '1px solid var(--input-border)',
-                    borderRadius: '4px',
-                    fontSize: '16px'
-                  }}
-                />
-                <br />
-                <button
-                  onClick={handleSaveConsulta}
-                  disabled={!email.trim()}
-                  style={{
-                    padding: '10px 20px',
-                    backgroundColor: 'var(--primary-color)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '16px'
-                  }}
-                >
-                  Guardar y finalizar
-                </button>
-              </div>
-            )}
-
     </div>
   );
 };

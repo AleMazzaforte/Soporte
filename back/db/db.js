@@ -26,7 +26,6 @@ const poolConnection = mysql.createPool({
 
 const conn = poolConnection.promise();
 export default conn;
-
 // Verificación de conexión
 (async () => {
   try {
