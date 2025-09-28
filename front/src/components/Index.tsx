@@ -14,16 +14,12 @@ const chat = Endpoints.CHAT;
 interface Impresora {
   id: number;
   nombre: string;
-  idToner: string;
+  idToner1: string; // Siempre presente
+  idToner2: string | null; // Opcional
+  idToner3: string | null; // Opcional
+  idToner4: string | null; // Opcional
 }
 
-interface ModeloAgrupado {
-  nombre: string;
-  toners: {
-    id: number;
-    idToner: string;
-  }[];
-}
 interface TonerInfo {
   nombre: string;
   skus: string[]; // Para almacenar todos los SKUs
@@ -31,6 +27,11 @@ interface TonerInfo {
 interface Marca {
   id: number;
   nombre: string;
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
 }
 
 interface ChatMessage {
@@ -114,15 +115,12 @@ const Index: React.FC = () => {
   const [isLoadingModelos, setIsLoadingModelos] = useState(false);
 
   const [tonerInfo, setTonerInfo] = useState<TonerInfo | null>(null);
-
+  const [modelosAgrupados, setModelosAgrupados] = useState<Impresora[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newModelName, setNewModelName] = useState("");
   const [newModelToner, setNewModelToner] = useState("");
   const [isHuman, setIsHuman] = useState(false);
   const [botCheck, setBotCheck] = useState("");
-  const [modelosAgrupados, setModelosAgrupados] = useState<ModeloAgrupado[]>(
-    []
-  );
   const [tonersDelModelo, setTonersDelModelo] = useState<{ idToner: string }[]>(
     []
   );
@@ -132,7 +130,7 @@ const Index: React.FC = () => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-  
+
   useEffect(() => {
     scrollToBottom();
   }, [chatMessages]);
@@ -213,73 +211,63 @@ const Index: React.FC = () => {
         }
       },
       medioCompra: () => setCurrentStep("impresora"),
+      
       impresora: async () => {
-  setIsLoadingModelos(true);
-  try {
-    const marcaSeleccionada = marcas.find((m) => m.nombre === value);
-    if (marcaSeleccionada) {
-      const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
-      const response = await axios.get(`${endpoint}`);
-      const modelosData = response.data.data || [];
+        setIsLoadingModelos(true);
+        try {
+          const marcaSeleccionada = marcas.find((m) => m.nombre === value);
+          if (marcaSeleccionada) {
+            const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
+            const response = await axios.get<ApiResponse<Impresora[]>>(endpoint);
+            const modelosData = response.data.data || [];
 
-      // Agrupar modelos por nombre
-      const modelosAgrupados = modelosData.reduce(
-        (acc: ModeloAgrupado[], curr: Impresora) => {
-          const modeloExistente = acc.find((m) => m.nombre === curr.nombre);
-          if (modeloExistente) {
-            modeloExistente.toners.push({
-              id: curr.id,
-              idToner: curr.idToner,
-            });
-          } else {
-            acc.push({
-              nombre: curr.nombre,
-              toners: [{
-                id: curr.id,
-                idToner: curr.idToner,
-              }],
-            });
+            // ✅ Ya no agrupamos: cada modelo es único
+            setModelosAgrupados(modelosData); // Reutilizamos el estado para no romper el resto
           }
-          return acc;
-        },
-        []
-      );
-
-      setModelosAgrupados(modelosAgrupados);
-    }
-  } catch (error) {
-    console.error(`Error al cargar modelos ${value}`, error);
-    setModelosAgrupados([]);
-  } finally {
-    setIsLoadingModelos(false);
-  }
-  setCurrentStep("modelo");
-},
+        } catch (error) {
+          console.error(`Error al cargar modelos ${value}`, error);
+          setModelosAgrupados([]);
+        } finally {
+          setIsLoadingModelos(false);
+        }
+        setCurrentStep("modelo");
+      },
       modelo: async () => {
-  const modeloSeleccionado = modelosAgrupados.find(m => m.nombre === value);
-  if (modeloSeleccionado) {
-    try {
-      // Obtener todos los SKUs para este modelo
-      const skusPromises = modeloSeleccionado.toners.map(toner => 
-        axios.get(`${urlBase}/sku/${toner.idToner}`)
-      );
-      
-      const responses = await Promise.all(skusPromises);
-      const skus = responses.map(res => res.data.data.nombre);
-      
-      setTonerInfo({
-        nombre: modeloSeleccionado.nombre,
-        skus: skus
-      });
-      
-      setTonersDelModelo(modeloSeleccionado.toners);
-      setCurrentStep("tonerCorrecto");
-    } catch (error) {
-      console.error("Error al cargar información de los toners", error);
-      setTonerInfo(null);
-    }
-  }
-},
+        const modeloSeleccionado = modelosAgrupados.find(
+          (m) => m.nombre === value
+        );
+        if (modeloSeleccionado) {
+          try {
+            // ✅ Extraer toners no nulos
+            const toners = [
+              modeloSeleccionado.idToner1,
+              modeloSeleccionado.idToner2,
+              modeloSeleccionado.idToner3,
+              modeloSeleccionado.idToner4,
+            ].filter((t) => t !== null && t !== undefined) as string[];
+
+            // Obtener SKUs para todos los toners
+            const skusPromises = toners.map((tonerId) =>
+              axios.get(`${urlBase}/sku/${tonerId}`)
+            );
+
+            const responses = await Promise.all(skusPromises);
+            const skus = responses.map((res) => res.data.data.nombre);
+
+            setTonerInfo({
+              nombre: modeloSeleccionado.nombre,
+              skus: skus,
+            });
+
+            // Para mantener compatibilidad con el estado existente
+            setTonersDelModelo(toners.map((idToner) => ({ idToner })));
+            setCurrentStep("tonerCorrecto");
+          } catch (error) {
+            console.error("Error al cargar información de los toners", error);
+            setTonerInfo(null);
+          }
+        }
+      },
       tonerCorrecto: () => {
         if (value === "Sí") {
           setCurrentStep("falla");
@@ -484,7 +472,6 @@ const Index: React.FC = () => {
                       (m) => m.nombre === selectedOption.value
                     );
                     if (modeloSeleccionado) {
-                      setTonersDelModelo(modeloSeleccionado.toners);
                       handleSelection("modelo", selectedOption.value);
                     }
                   }
@@ -492,18 +479,7 @@ const Index: React.FC = () => {
                 className="react-select-container"
                 classNamePrefix="react-select"
               />
-
-              {/* Mostrar todos los toners del modelo seleccionado */}
-              {selections.modelo && tonersDelModelo.length > 0 && (
-                <div className="toners-container">
-                  <h3>Cartuchos compatibles:</h3>
-                  <ul>
-                    {tonersDelModelo.map((toner, index) => (
-                      <li key={index}>SKU: {toner.idToner}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+  
               {isModalOpen && (
                 <div className="modal-overlay">
                   <div className="modal-content">
@@ -549,7 +525,7 @@ const Index: React.FC = () => {
                         type="text"
                         value={botCheck}
                         onChange={(e) => setBotCheck(e.target.value)}
-                        className="honeypot-input" 
+                        className="honeypot-input"
                       />
                       <div className="modal-buttons">
                         <button type="submit">Guardar</button>

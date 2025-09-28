@@ -3,8 +3,10 @@ import { switchNombreTabla } from "../utils/switchNombreTabla.js";
 
 const impresorasController = {
   getImpresoras: async (req, res) => {
+  
     const idMarca = req.params.idMarca;
     const nombreTabla = switchNombreTabla(idMarca);
+
 
     if (!nombreTabla) {
       return res.status(400).json({
@@ -18,9 +20,10 @@ const impresorasController = {
       connection = await conn.getConnection();
 
       const query =
-        "SELECT id, nombre, idToner FROM ?? ORDER BY nombre";
+        "SELECT id, nombre, idToner1, idToner2, idToner3, idToner4 FROM ?? ORDER BY nombre";
       const [rows] = await connection.query(query, [nombreTabla]);
       
+
       
       res.json({
         success: true,

@@ -1,21 +1,21 @@
 export function switchNombreTabla(idMarca) {
   switch (idMarca.toString()) {
     case "1":
-      return "impresorasHpToner";
+      return "impresorasHp";
     case "2":
-      return "impresorasBrotherToner";
+      return "impresorasBrother";
     case "3":
-      return "impresorasRicohToner";
+      return "impresorasRicoh";
     case "4":
-      return "impresorasXeroxToner";
+      return "impresorasXerox";
     case "5":
-      return "impresorasSamsungToner";
+      return "impresorasSamsung";
     case "11":
-      return "impresorasLexmarkToner";
+      return "impresorasLexmark";
     case "12":
-      return "impresorasEpsonTinta";
+      return "impresorasEpson";
     case "13":
-      return "impresorasPantumToner";
+      return "impresorasPantum";
     default:
       return null;
   }
