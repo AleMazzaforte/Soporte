@@ -46,7 +46,7 @@ const impresorasController = {
   },
 
   postGuardarImpresora: async (req, res) => {
-    const { nombre, idToner, idMarca } = req.body;
+    const { nombre, idToner1, idMarca, idToner2, idToner3, idToner4 } = req.body;
 
     const nombreTabla = switchNombreTabla(idMarca);
 
@@ -61,9 +61,9 @@ const impresorasController = {
     try {
       connection = await conn.getConnection();
 
-      const query = `INSERT INTO \`${nombreTabla}\` (nombre, idToner) VALUES ( ?, ?)`;
+      const query = `INSERT INTO \`${nombreTabla}\` (nombre, idToner1, idToner2, idToner3, idToner4 ) VALUES ( ?, ?, ?, ?, ?)`;
 
-      await connection.query(query, [nombre, idToner]);
+      await connection.query(query, [nombre, idToner1, idToner2, idToner3, idToner4]);
 
       res.status(200).json({
         success: true,

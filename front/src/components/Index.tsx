@@ -121,9 +121,7 @@ const Index: React.FC = () => {
   const [newModelToner, setNewModelToner] = useState("");
   const [isHuman, setIsHuman] = useState(false);
   const [botCheck, setBotCheck] = useState("");
-  const [tonersDelModelo, setTonersDelModelo] = useState<{ idToner: string }[]>(
-    []
-  );
+ 
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -258,9 +256,6 @@ const Index: React.FC = () => {
               nombre: modeloSeleccionado.nombre,
               skus: skus,
             });
-
-            // Para mantener compatibilidad con el estado existente
-            setTonersDelModelo(toners.map((idToner) => ({ idToner })));
             setCurrentStep("tonerCorrecto");
           } catch (error) {
             console.error("Error al cargar información de los toners", error);
