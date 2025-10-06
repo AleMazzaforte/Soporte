@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import Select from "react-select";
 import axios from "axios";
 import Endpoints from "../utilities/Endpoints";
-import ListarImpresoras from "../utilities/ListarImpresoras";
 import { useNavigate } from "react-router-dom";
 
 let urlBase = Endpoints.URLPROD;
