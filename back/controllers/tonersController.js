@@ -1,34 +1,48 @@
 import conn from "../db/db.js";
 
 const tonersController = {
-  getToners: async (req, res) => {
-    const idToner = req.params.idToner;
-    let nombreTabla = "toners";
+  getTonersBulk: async (req, res) => {
+  const { ids } = req.body; // Esperamos un array: ["1", "2", "3"]
 
-    let connection;
-    try {
-      connection = await conn.getConnection();
-      
-      const query = "SELECT id, nombre FROM ?? WHERE id = ? ORDER BY nombre";
-      const [rows] = await connection.query(query, [nombreTabla, idToner]);
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({
+      success: false,
+      error: { message: "Se requiere un array de IDs" },
+    });
+  }
 
-      res.json({
-        success: true,
-        data: rows[0],
-      });
-      
-    } catch (error) {
-      console.error("Error al obtener impresoras:", error);
-      res.status(500).json({
-        success: false,
-        error: { message: "Error al obtener impresoras", details: error.message },
-      });
-    } finally {
-      if (connection) {
-        connection.release(); // Liberar la conexión al pool
-      }
+  // Validar que todos los IDs sean strings o números válidos
+  const validIds = ids.filter(id => id && (typeof id === 'string' || typeof id === 'number'));
+  if (validIds.length === 0) {
+    return res.status(400).json({
+      success: false,
+      error: { message: "IDs inválidos" },
+    });
+  }
+
+  let connection;
+  try {
+    connection = await conn.getConnection();
+    const query = "SELECT id, nombre FROM ?? WHERE id IN (?) ORDER BY nombre";
+    const [rows] = await connection.query(query, ["toners", validIds]);
+
+    // Convertir a objeto para acceso rápido si lo deseas, o mantener como array
+    res.json({
+      success: true,
+      data: rows, // [{ id: "1", nombre: "Toner X" }, ...]
+    });
+  } catch (error) {
+    console.error("Error al obtener toners en bulk:", error);
+    res.status(500).json({
+      success: false,
+      error: { message: "Error al obtener toners", details: error.message },
+    });
+  } finally {
+    if (connection) {
+      connection.release();
     }
-  },
+  }
+},
 
   getAllToners: async (req, res) => {
     let nombreTabla = "toners";

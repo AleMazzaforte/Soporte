@@ -121,7 +121,6 @@ const Index: React.FC = () => {
   const [newModelToner, setNewModelToner] = useState("");
   const [isHuman, setIsHuman] = useState(false);
   const [botCheck, setBotCheck] = useState("");
- 
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -209,18 +208,19 @@ const Index: React.FC = () => {
         }
       },
       medioCompra: () => setCurrentStep("impresora"),
-      
+
       impresora: async () => {
         setIsLoadingModelos(true);
         try {
           const marcaSeleccionada = marcas.find((m) => m.nombre === value);
           if (marcaSeleccionada) {
             const endpoint = urlBase + "/impresoras/" + marcaSeleccionada.id;
-            const response = await axios.get<ApiResponse<Impresora[]>>(endpoint);
+            const response = await axios.get<ApiResponse<Impresora[]>>(
+              endpoint
+            );
             const modelosData = response.data.data || [];
 
-            // ✅ Ya no agrupamos: cada modelo es único
-            setModelosAgrupados(modelosData); // Reutilizamos el estado para no romper el resto
+            setModelosAgrupados(modelosData);
           }
         } catch (error) {
           console.error(`Error al cargar modelos ${value}`, error);
@@ -235,31 +235,53 @@ const Index: React.FC = () => {
           (m) => m.nombre === value
         );
         if (modeloSeleccionado) {
-          try {
-            // ✅ Extraer toners no nulos
-            const toners = [
-              modeloSeleccionado.idToner1,
-              modeloSeleccionado.idToner2,
-              modeloSeleccionado.idToner3,
-              modeloSeleccionado.idToner4,
-            ].filter((t) => t !== null && t !== undefined) as string[];
+          // ✅ Extraer toners no nulos
+          const toners = [
+            modeloSeleccionado.idToner1,
+            modeloSeleccionado.idToner2,
+            modeloSeleccionado.idToner3,
+            modeloSeleccionado.idToner4,
+          ].filter((t) => t !== null && t !== undefined) as string[];
 
-            // Obtener SKUs para todos los toners
-            const skusPromises = toners.map((tonerId) =>
-              axios.get(`${urlBase}/sku/${tonerId}`)
-            );
-
-            const responses = await Promise.all(skusPromises);
-            const skus = responses.map((res) => res.data.data.nombre);
-
+          if (toners.length === 0) {
             setTonerInfo({
               nombre: modeloSeleccionado.nombre,
-              skus: skus,
+              skus: [],
             });
             setCurrentStep("tonerCorrecto");
-          } catch (error) {
-            console.error("Error al cargar información de los toners", error);
-            setTonerInfo(null);
+          } else {
+            try {
+              // 🚀 Una sola llamada para todos los toners
+              const response = await axios.post(`${urlBase}/sku/bulk`, {
+                ids: toners,
+              });
+
+              // Crear un mapa para buscar rápido por ID
+              const tonerMap = new Map(
+                response.data.data.map((item: any) => [item.id, item.nombre])
+              );
+
+              // Asegurar el mismo orden que en `toners`
+              const skus: string[] = toners.map((id) => {
+                const nombre = tonerMap.get(id);
+                return typeof nombre === "string"
+                  ? nombre
+                  : `Toner ${id} no encontrado`;
+              });
+
+              setTonerInfo({
+                nombre: modeloSeleccionado.nombre,
+                skus: skus,
+              });
+              setCurrentStep("tonerCorrecto");
+            } catch (error) {
+              console.error("Error al cargar información de los toners", error);
+              setTonerInfo({
+                nombre: modeloSeleccionado.nombre,
+                skus: ["Error al cargar los cartuchos compatibles"],
+              });
+              setCurrentStep("tonerCorrecto");
+            }
           }
         }
       },
@@ -474,7 +496,7 @@ const Index: React.FC = () => {
                 className="react-select-container"
                 classNamePrefix="react-select"
               />
-  
+
               {isModalOpen && (
                 <div className="modal-overlay">
                   <div className="modal-content">
