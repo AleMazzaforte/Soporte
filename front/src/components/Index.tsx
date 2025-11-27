@@ -263,7 +263,7 @@ const Index: React.FC = () => {
 
               // Asegurar el mismo orden que en `toners`
               const skus: string[] = toners.map((id) => {
-                const nombre = tonerMap.get(id);
+                const nombre = tonerMap.get(Number(id));
                 return typeof nombre === "string"
                   ? nombre
                   : `Toner ${id} no encontrado`;
